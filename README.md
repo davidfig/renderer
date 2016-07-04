@@ -65,6 +65,10 @@ wrapper for PIXI.Renderer class for use with https://github.com/davidfig/update,
 ## Live Example
 https://davidfig.github.io/renderer/
 
+see also
+
+* https://davidfig.github.io/viewport/
+
 ## Installation
 include renderer.js in your project or add to your workflow
 
