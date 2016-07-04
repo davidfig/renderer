@@ -3,7 +3,7 @@
     License: MIT license <https://github.com/davidfig/update/license>
     Author: David Figatner
     Copyright (c) 2016 YOPEY YOPEY LLC
-*/ (function(){
+*/ ;(function(){
 
 // renderer wrapper for pixi.js
 // options {}
@@ -192,4 +192,4 @@ if (typeof exports !== 'undefined')
 if (typeof window !== 'undefined')
 {
     window.Renderer = Renderer;
-} })();
+}   })();
