@@ -58,7 +58,7 @@
             var scaleY = Math.random() * 3;
             var alpha = 0.5 * Math.random();
             var rotation = Math.random() * Math.PI * 2;
-            var time = Math.random() * 5000;
+            var time = 1000 + Math.random() * 4000;
             Animate.to(t, {alpha: alpha, x: x, y: y, scale: {x: scaleX, y: scaleY}, rotation: rotation}, time, {renderer: renderer}, Easing.easeInOutSine);
         }
 
