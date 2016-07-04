@@ -1,5 +1,5 @@
 /*
-    c.js <https://github.com/davidfig/renderer>
+    renderer.js <https://github.com/davidfig/renderer>
     License: MIT license <https://github.com/davidfig/update/license>
     Author: David Figatner
     Copyright (c) 2016 YOPEY YOPEY LLC
@@ -47,7 +47,7 @@ function Renderer(options)
     this.width = 0;
     this.height = 0;
     this.offset = new PIXI.Point();
-    if (Debug)
+    if (typeof Debug !== 'undefined')
     {
         var name = options.debug || 'PIXI';
         this.debug = Debug.add(name, {side: options.side, text: '<span style="background:white">X</span> ' + name});
