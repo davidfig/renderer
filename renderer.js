@@ -19,6 +19,7 @@
  //     preserveDrawingBuffer: false (default) or true - enables drawing buffer preservation, enable this if you need to call toDataUrl on the webgl context.
  //     roundPixels: false (default) or true - If true Pixi will Math.floor() x/y values when rendering, stopping pixel interpolation
 //      debug: name for debug panel
+//      side: side for debug panel: 'bottomRight' (default), 'bottomLeft', 'topLeft', or 'topRight'
 function Renderer(options)
 {
     options = options || {};
@@ -36,7 +37,7 @@ function Renderer(options)
     var noWebGL = options.noWebGL || false;
     options.noWebGL = null;
     this.autoResize = options.autoresize;
-    options.resize = null;
+    options.autoresize = null;
     var Renderer = noWebGL ? PIXI.CanvasRenderer : PIXI.WebGLRenderer;
     this.aspectRatio = options.aspectRatio;
     options.transparent = true;
@@ -48,14 +49,16 @@ function Renderer(options)
     this.offset = new PIXI.Point();
     if (Debug)
     {
-        this.debug = Debug.add();
+        var name = options.debug || 'PIXI';
+        this.debug = Debug.add(name, {side: options.side, text: '<span style="background:white">X</span> ' + name});
+        this.debug.name = name;
     }
     if (options.resize)
     {
         window.addEventListener('resize', this.resize.bind(this));
     }
-    Update.add(this.update.bind(this), null, null, {percent: options.name || 'PIXI'});
-    if (this.autoResize)
+    Update.add(this.update.bind(this), null, {percent: options.debug || 'PIXI'});
+    if (this.autoresize)
     {
         window.addEventListener('resize', this.resize.bind(this));
     }
@@ -72,11 +75,17 @@ Renderer.prototype.render = function()
 // render the scene
 Renderer.prototype.update = function ()
 {
-    // if (YY.DEBUG)
-    // {
-    //     YY.Debug.render(this.debug[0], this.dirty);
-    //     YY.Debug.renderCount(this.debug[1], this.countObjects());
-    // }
+    if (Debug)
+    {
+        var count = this.countObjects();
+        if (this.last !== this.dirty || count !== this.lastCount)
+        {
+            var color = this.dirty ? 'white' : 'gray';
+            debugOne(this.debug.name + ': <span style="background: ' + color + '; color: ' + color + '">X</span> ' + count + ' objects', {panel: this.debug});
+            this.last = this.dirty;
+            this.lastCount = count;
+        }
+    }
     if (this.dirty)
     {
         this.render();
@@ -84,6 +93,7 @@ Renderer.prototype.update = function ()
     }
 };
 
+// counts visible objects for debug panel
 Renderer.prototype.countObjects = function()
 {
     function count(object)
@@ -98,54 +108,38 @@ Renderer.prototype.countObjects = function()
             count(object.children[i]);
         }
     }
-
     var total = 0;
     count(this.stage);
     return total;
 };
 
-/**
- * sets background color for renderer
- * @param  {number} color
- */
+// sets the background color (in CSS format)
 Renderer.prototype.background = function(color)
 {
-    this.renderer.backgroundColor = color;
+    this.div.style.backgroundColor = color;
 };
 
-/**
- * adds a PIXI object to the renderer's stage
- * @param {object} object
- * @param {number|null} to  where to add the object
- */
+// adds object to stage
 Renderer.prototype.add = function(object, to)
 {
     to = to || this.stage.children.length;
     this.stage.addChildAt(object, to);
 };
 
-/**
- * another name for add (to work with stage -> renderer rewrites
- */
 Renderer.prototype.addChild = Renderer.prototype.addChildTo = Renderer.prototype.add;
 
-/**
- * removes child from the stage
- * @param  {PIXI.DisplayObject} object
- */
+// remove child from stage
 Renderer.prototype.remove = function(object)
 {
     this.stage.removeChild(object);
 };
 
+// clears stage
 Renderer.prototype.clear = function()
 {
     this.stage.removeChildren();
 };
 
-/**
- * @param  {boolean} force a resize regardless of original size
- */
 Renderer.prototype.resize = function(force)
 {
     var width = this.div.offsetWidth;

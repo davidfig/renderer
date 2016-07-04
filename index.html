@@ -26,65 +26,49 @@
     </style>
 </head>
 <body>
-    <div class="title">Example for <a href="https://github.com/davidfig/animate/">github.com/davidfig/animate/</a></div>
+    <div class="title">Example for <a href="https://github.com/davidfig/renderer/">github.com/davidfig/renderer/</a></div>
     <pre><code class="javascript" id="code"></code></pre>
     <script id="sample">
 
-        // initialize Debug and Update -- this is only needed for the debug panels on the bottom right
+        // debug panel on the bottom right
         Debug.init();
+
+        // used for automatic rendering
         Update.init();
         Update.update();
 
-        var renderer = new Renderer({resize: true, color: 'green'});
+        var renderer = new Renderer({resize: true});
         var stage = renderer.stage;
         for (var i = 0; i < 100; i++)
         {
             var t = triangle(Math.random() * renderer.width * 0.1, Math.random() * 0xffffff);
             t.position.set(Math.random() * renderer.width, Math.random() * renderer.height);
+            next;
         }
-        renderer.dirty = true;
+        move();
+        Update.add(move, 6000);
 
-        // // red triangle fades, moves, and scales; repeats and reverses forever
-        // Animate.to(red, {alpha: 0.1, x: 500, y: 500, scale: {x: 5, y: 5}}, 1000,
-        //     {repeat: true, reverse: true}, Easing.easeInOutSine);
+        debug('Notice the render light above automatically turns off when the animations stop.');
 
-        // // green triangle moves, rotates, and fades when done
-        // Animate.to(green, {x: 50, y: 400, rotation: 2 * Math.PI}, 2500,
-        //     {reverse: true, onDone: function (object) { Animate.to(object, {alpha: 0}, 2000); }}, Easing.easeInSine);
+        function next(t)
+        {
+            var x = Math.random() * renderer.width;
+            var y = Math.random() * renderer.height;
+            var scaleX = Math.random() * 3;
+            var scaleY = Math.random() * 3;
+            var alpha = 0.5 * Math.random();
+            var rotation = Math.random() * Math.PI * 2;
+            var time = Math.random() * 5000;
+            Animate.to(t, {alpha: alpha, x: x, y: y, scale: {x: scaleX, y: scaleY}, rotation: rotation}, time, {renderer: renderer}, Easing.easeInOutSine);
+        }
 
-        // // blue triangle spins forever
-        // Animate.to(blue, {rotation: -2 * Math.PI}, 1000, {continue: true});
-
-        // // circle changes from blue to red and reverse and repeats
-        // Animate.tint(sprite, 0xff0000, 2000, {repeat: true, reverse: true});
-
-        // // circle also shakes forever, it starts after 1 second
-        // Animate.shake(sprite, 5, 0, {repeat: true, wait: 1000});
-
-        // // render loop
-        // function update()
-        // {
-        //     renderer.render(stage);
-        // }
-        // Update.add(update, null, {percent: 'Render'});
-        // Update.update();
-
-        // function pixi()
-        // {
-        //     renderer = new PIXI.WebGLRenderer(1000, 1000, {transparent: true});
-        //     document.body.appendChild(this.renderer.view);
-        //     stage = new PIXI.Container();
-        //     red = triangle(100, 0xff0000);
-        //     red.position.set(50, 50);
-        //     green = triangle(50, 0x00ff00);
-        //     green.position.set(300,300);
-        //     blue = triangle(50, 0x0000ff);
-        //     blue.position.set(500,100);
-        //     sprite = PIXI.Sprite.fromImage('circle.png');
-        //     stage.addChild(sprite);
-        //     sprite.tint = 0x0000ff;
-        //     sprite.position.set(200, 200);
-        // }
+        function move()
+        {
+            for (var i = 0; i < stage.children.length; i++)
+            {
+                next(stage.children[i]);
+            }
+        }
 
         function triangle(size, color)
         {
