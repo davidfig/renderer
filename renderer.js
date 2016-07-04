@@ -23,8 +23,8 @@
 function Renderer(options)
 {
     options = options || {};
-    this.canvas = options.canvas;
-    if (!this.canvas)
+    this.div = options.div;
+    if (!this.div)
     {
         this.div = document.createElement('div');
         document.body.appendChild(this.div);
@@ -124,6 +124,7 @@ Renderer.prototype.add = function(object, to)
 {
     to = to || this.stage.children.length;
     this.stage.addChildAt(object, to);
+    return object;
 };
 
 Renderer.prototype.addChild = Renderer.prototype.addChildTo = Renderer.prototype.add;
