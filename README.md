@@ -1,5 +1,5 @@
 ## renderer.js
-wrapper for PIXI.Renderer class for use with https://github.com/davidfig/update and https://github.com/davidfig/animate
+wrapper for PIXI.Renderer class for use with https://github.com/davidfig/update, https://github.com/davidfig/animate, and https://github.com/davidfig/debug
 
 ## Example
 
