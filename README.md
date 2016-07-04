@@ -10,9 +10,10 @@ wrapper for PIXI.Renderer class for use with https://github.com/davidfig/update 
         Update.init();
         Update.update();
 
+        // creates the renderer with one option
         var renderer = new Renderer({resize: true});
-        var stage = renderer.stage;
 
+        // set initial position for all triangles
         for (var i = 0; i < 100; i++)
         {
             var t = triangle(Math.random() * renderer.width * 0.1, Math.random() * 0xffffff);
@@ -20,11 +21,11 @@ wrapper for PIXI.Renderer class for use with https://github.com/davidfig/update 
             next;
         }
         move();
-
         Update.add(move, 6000);
 
         debug('Notice the render light above automatically turns off when the animations stop.');
 
+        // animate one triangle with random values
         function next(t)
         {
             var x = Math.random() * renderer.width;
@@ -36,18 +37,22 @@ wrapper for PIXI.Renderer class for use with https://github.com/davidfig/update 
             var time = 1000 + Math.random() * 4000;
             Animate.to(t, {alpha: alpha, x: x, y: y, scale: {x: scaleX, y: scaleY}, rotation: rotation}, time, {renderer: renderer}, Easing.easeInOutSine);
         }
+
+        // animate all objects
         function move()
         {
-            for (var i = 0; i < stage.children.length; i++)
+            for (var i = 0; i < renderer.stage.children.length; i++)
             {
-                next(stage.children[i]);
+                next(renderer.stage.children[i]);
             }
         }
+
+        // create the triangles
         function triangle(size, color)
         {
             var half = size / 2;
             var g = new PIXI.Graphics();
-            stage.addChild(g);
+            renderer.add(g);
             g.beginFill(color);
             g.moveTo(0, -half);
             g.lineTo(-half, half);
@@ -63,7 +68,7 @@ https://davidfig.github.io/renderer/
 ## Installation
 include renderer.js in your project or add to your workflow
 
-    <script src="animate.js"></script>
+    <script src="renderer.js"></script>
 
 ## API Reference
 
