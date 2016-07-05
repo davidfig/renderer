@@ -16,9 +16,10 @@
 //      forceFXAA: false (default) or true - forces FXAA antialiasing to be used over native. FXAA is faster, but may not always look as great
 //      resolution: 1 (default) - resolution / device pixel ratio of the renderer (e.g., retina is 2)
 //      clearBeforeRender: true (default) or false - sets if the CanvasRenderer will clear the canvas or before the render pass. If you wish to set this to false, you *must* set preserveDrawingBuffer to `true`.
- //     preserveDrawingBuffer: false (default) or true - enables drawing buffer preservation, enable this if you need to call toDataUrl on the webgl context.
- //     roundPixels: false (default) or true - If true Pixi will Math.floor() x/y values when rendering, stopping pixel interpolation
-//      debug: name for debug panel
+//      preserveDrawingBuffer: false (default) or true - enables drawing buffer preservation, enable this if you need to call toDataUrl on the webgl context.
+//      roundPixels: false (default) or true - If true Pixi will Math.floor() x/y values when rendering, stopping pixel interpolation
+//      debug: show debug panels
+//      panel: name for debug panel
 //      side: side for debug panel: 'bottomRight' (default), 'bottomLeft', 'topLeft', or 'topRight'
 function Renderer(options)
 {
@@ -47,10 +48,10 @@ function Renderer(options)
     this.width = 0;
     this.height = 0;
     this.offset = new PIXI.Point();
-    if (typeof Debug !== 'undefined')
+    if (options.debug)
     {
-        var name = options.debug || 'PIXI';
-        this.debug = Debug.add(name, {side: options.side, text: '<span style="background:white">X</span> ' + name});
+        var name = options.panel || 'PIXI';
+        this.debug = Debug.add(name, {side: options.side, text: name + ': <span style="background:white">X</span> 0 objects'});
         this.debug.name = name;
     }
     if (options.resize)
@@ -75,7 +76,7 @@ Renderer.prototype.render = function()
 // render the scene
 Renderer.prototype.update = function ()
 {
-    if (Debug)
+    if (this.debug)
     {
         var count = this.countObjects();
         if (this.last !== this.dirty || count !== this.lastCount)
@@ -185,7 +186,7 @@ if (typeof define === 'function' && define.amd)
 // add support for CommonJS libraries such as browserify.
 if (typeof exports !== 'undefined')
 {
-    exports.Renderer = Renderer;
+    module.exports = Renderer;
 }
 
 // define globally in case AMD is not available or available but not used
