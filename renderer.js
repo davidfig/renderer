@@ -18,6 +18,7 @@
 //      clearBeforeRender: true (default) or false - sets if the CanvasRenderer will clear the canvas or before the render pass. If you wish to set this to false, you *must* set preserveDrawingBuffer to `true`.
 //      preserveDrawingBuffer: false (default) or true - enables drawing buffer preservation, enable this if you need to call toDataUrl on the webgl context.
 //      roundPixels: false (default) or true - If true Pixi will Math.floor() x/y values when rendering, stopping pixel interpolation
+//      styles: {} apply these CSS styles to the div
 //      debug: show debug panels
 //      panel: name for debug panel
 //      side: side for debug panel: 'bottomRight' (default), 'bottomLeft', 'topLeft', or 'topRight'
@@ -45,6 +46,13 @@ function Renderer(options)
     this.renderer = new Renderer(0, 0, options);
     this.div.appendChild(this.renderer.view);
     this.div.style.backgroundColor = options.color;
+    if (options.styles)
+    {
+        for (var style in options.styles)
+        {
+            this.div.style[style] = options.styles[style];
+        }
+    }
     this.width = 0;
     this.height = 0;
     this.offset = new PIXI.Point();
