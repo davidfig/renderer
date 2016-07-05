@@ -51,6 +51,7 @@ function Renderer(options)
         for (var style in options.styles)
         {
             this.div.style[style] = options.styles[style];
+            this.canvas.style[style] = options.styles[style];
         }
     }
     this.width = 0;
