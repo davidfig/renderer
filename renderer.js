@@ -42,10 +42,16 @@ function Renderer(options)
     options.autoresize = null;
     var Renderer = noWebGL ? PIXI.CanvasRenderer : PIXI.WebGLRenderer;
     this.aspectRatio = options.aspectRatio;
-    options.transparent = true;
+    if (typeof options.color === 'undefined')
+    {
+        options.transparent = true;
+    }
     this.renderer = new Renderer(0, 0, options);
     this.div.appendChild(this.renderer.view);
-    this.div.style.backgroundColor = options.color;
+    if (options.color)
+    {
+        this.renderer.backgroundColor = options.color;
+    }
     if (options.styles)
     {
         for (var style in options.styles)
