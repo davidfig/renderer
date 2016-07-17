@@ -186,11 +186,13 @@ Renderer.prototype.resize = function(force)
     }
 };
 
+// returns the smaller of the width/height based
 Renderer.prototype.dimensionSmall = function()
 {
     return (this.landscape ? this.height : this.width);
 }
 
+// returns the larger of the width/height based
 Renderer.prototype.dimensionBig = function()
 {
     return (this.landscape ? this.width : this.height);
