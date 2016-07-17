@@ -186,6 +186,16 @@ Renderer.prototype.resize = function(force)
     }
 };
 
+Renderer.prototype.dimensionSmall = function()
+{
+    return (this.landscape ? this.height : this.width);
+}
+
+Renderer.prototype.dimensionBig = function()
+{
+    return (this.landscape ? this.width : this.height);
+}
+
 // add support for AMD (Asynchronous Module Definition) libraries such as require.js.
 if (typeof define === 'function' && define.amd)
 {
