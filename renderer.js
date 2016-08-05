@@ -46,6 +46,7 @@ function Renderer(options)
     {
         options.transparent = true;
     }
+    options.antialias = (typeof options.antialias === 'undefined') ? true : options.antialias;
     this.renderer = new Renderer(0, 0, options);
     this.div.appendChild(this.renderer.view);
     if (options.color)
