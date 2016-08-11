@@ -178,8 +178,12 @@ Renderer.prototype.clear = function()
 
 Renderer.prototype.resize = function(force)
 {
-    var width = this.canvas.offsetWidth;
-    var height = this.canvas.offsetHeight;
+    var w = window,
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('body')[0];
+    var width = w.innerWidth || e.clientWidth || g.clientWidth;
+    var height = w.innerHeight|| e.clientHeight|| g.clientHeight;
     if (this.aspectRatio)
     {
         if (width > height)
