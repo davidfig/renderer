@@ -28,12 +28,6 @@ function Renderer(options)
     options = options || {};
     this.canvas = options.canvas;
     options.resolution = this.resolution = options.resolution || 1;
-    var w = window,
-        d = document,
-        e = d.documentElement,
-        g = d.getElementsByTagName('body')[0];
-    var width = w.innerWidth || e.clientWidth || g.clientWidth;
-    var height = w.innerHeight|| e.clientHeight|| g.clientHeight;
     if (!this.canvas)
     {
         this.canvas = document.createElement('canvas');
@@ -46,6 +40,12 @@ function Renderer(options)
         {
             document.body.appendChild(this.canvas);
         }
+        var w = window,
+            d = document,
+            e = d.documentElement,
+            g = d.getElementsByTagName('body')[0];
+        var width = w.innerWidth || e.clientWidth || g.clientWidth;
+        var height = w.innerHeight|| e.clientHeight|| g.clientHeight;
         this.canvas.style.position = 'absolute';
         this.canvas.style.width = width + 'px';
         this.canvas.style.height = height + 'px';
@@ -54,6 +54,7 @@ function Renderer(options)
         this.canvas.style.left = this.canvas.style.top = '0px';
         this.canvas.style.overflow = 'auto';
     }
+    options.view = this.canvas;
     this.stage = new PIXI.Container();
     var noWebGL = options.noWebGL || false;
     options.noWebGL = null;
@@ -199,6 +200,8 @@ Renderer.prototype.resize = function(force)
     {
         this.width = width;
         this.height = height;
+        this.canvas.style.width = width + 'px';
+        this.canvas.style.height = height + 'px';
         this.renderer.resize(this.width, this.height);
         this.landscape = this.width > this.height;
         this.dirty = true;
