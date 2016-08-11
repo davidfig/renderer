@@ -8,7 +8,8 @@
 // renderer wrapper for pixi.js
 // options {}
 //      noWebGL: use the PIXI.CanvasRenderer instead of PIXI.WebGLRenderer
-//      div: place renderer in this div
+//      canvas: place renderer in this canvas
+//      parent: if no canvas is provided, use parent to provide parent for generated canvas; otherwise uses document.body
 //      aspectRatio: resizing will maintain aspect ratio by ensuring that the smaller dimension fits
 //      autoresize: false (default) or true - automatically calls resize during resize event
 //      color: background color in hex (0xffffff)
@@ -25,15 +26,33 @@
 function Renderer(options)
 {
     options = options || {};
-    this.div = options.div;
-    if (!this.div)
+    this.canvas = options.canvas;
+    options.resolution = this.resolution = options.resolution || 1;
+    var w = window,
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('body')[0];
+    var width = w.innerWidth || e.clientWidth || g.clientWidth;
+    var height = w.innerHeight|| e.clientHeight|| g.clientHeight;
+    if (!this.canvas)
     {
-        this.div = document.createElement('div');
-        document.body.appendChild(this.div);
-        this.div.style.position = 'absolute';
-        this.div.style.width = this.div.style.height = '100%';
-        this.div.style.left = this.div.style.top = '0';
-        this.div.style.overflow = 'auto';
+        this.canvas = document.createElement('canvas');
+        if (options.parent)
+        {
+            options.parent.appendChild(this.canvas);
+            options.parent = null;
+        }
+        else
+        {
+            document.body.appendChild(this.canvas);
+        }
+        this.canvas.style.position = 'absolute';
+        this.canvas.style.width = width + 'px';
+        this.canvas.style.height = height + 'px';
+        this.canvas.width = width * this.resolution;
+        this.canvas.height = height * this.resolution;
+        this.canvas.style.left = this.canvas.style.top = '0px';
+        this.canvas.style.overflow = 'auto';
     }
     this.stage = new PIXI.Container();
     var noWebGL = options.noWebGL || false;
@@ -47,8 +66,8 @@ function Renderer(options)
         options.transparent = true;
     }
     options.antialias = (typeof options.antialias === 'undefined') ? true : options.antialias;
-    this.renderer = new Renderer(0, 0, options);
-    this.div.appendChild(this.renderer.view);
+    this.renderer = new Renderer(width, height, options);
+    document.body.appendChild(this.renderer.view);
     if (options.color)
     {
         this.renderer.backgroundColor = options.color;
@@ -57,7 +76,7 @@ function Renderer(options)
     {
         for (var style in options.styles)
         {
-            this.div.style[style] = options.styles[style];
+            this.canvas.style[style] = options.styles[style];
         }
     }
     this.width = 0;
@@ -132,7 +151,7 @@ Renderer.prototype.countObjects = function()
 // sets the background color (in CSS format)
 Renderer.prototype.background = function(color)
 {
-    this.div.style.backgroundColor = color;
+    this.canvas.style.backgroundColor = color;
 };
 
 // adds object to stage
@@ -159,8 +178,8 @@ Renderer.prototype.clear = function()
 
 Renderer.prototype.resize = function(force)
 {
-    var width = this.div.offsetWidth;
-    var height = this.div.offsetHeight;
+    var width = this.canvas.offsetWidth;
+    var height = this.canvas.offsetHeight;
     if (this.aspectRatio)
     {
         if (width > height)
@@ -178,11 +197,6 @@ Renderer.prototype.resize = function(force)
         this.height = height;
         this.renderer.resize(this.width, this.height);
         this.landscape = this.width > this.height;
-        // this.renderer.view.style.position = 'absolute';
-        // this.offset.x = this.div.offsetWidth / 2 - width / 2;
-        // this.offset.y = this.div.offsetHeight / 2 - height / 2;
-        // this.renderer.view.style.left = this.offset.x + 'px';
-        // this.renderer.view.style.top = this.offset.y + 'px';
         this.dirty = true;
     }
 };
