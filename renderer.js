@@ -5,24 +5,27 @@
     Copyright (c) 2016 YOPEY YOPEY LLC
 */
 
-// renderer wrapper for pixi.js
-// options {}
-//      noWebGL: use the PIXI.CanvasRenderer instead of PIXI.WebGLRenderer
-//      canvas: place renderer in this canvas
-//      parent: if no canvas is provided, use parent to provide parent for generated canvas; otherwise uses document.body
-//      aspectRatio: resizing will maintain aspect ratio by ensuring that the smaller dimension fits
-//      autoresize: false (default) or true - automatically calls resize during resize event
-//      color: background color in hex (0xffffff)
-//      antialias: true (default) or false - if native antialias is not used, uses FXAA
-//      forceFXAA: false (default) or true - forces FXAA antialiasing to be used over native. FXAA is faster, but may not always look as great
-//      resolution: 1 (default) - resolution / device pixel ratio of the renderer (e.g., retina is 2)
-//      clearBeforeRender: true (default) or false - sets if the CanvasRenderer will clear the canvas or before the render pass. If you wish to set this to false, you *must* set preserveDrawingBuffer to `true`.
-//      preserveDrawingBuffer: false (default) or true - enables drawing buffer preservation, enable this if you need to call toDataUrl on the webgl context.
-//      roundPixels: false (default) or true - If true Pixi will Math.floor() x/y values when rendering, stopping pixel interpolation
-//      styles: {} apply these CSS styles to the div
-//      debug: show debug panels
-//      panel: name for debug panel
-//      side: side for debug panel: 'bottomRight' (default), 'bottomLeft', 'topLeft', or 'topRight'
+/**
+ * Wrapper for a PIXI.js Renderer
+ * @param {object} options
+ * @param {boolean=false} options.alwaysRender - update renderer every update tick
+ * @param {boolean=false} options.noWebGL - use the PIXI.CanvasRenderer instead of PIXI.WebGLRenderer
+ * @param {HTMLCanvasElement=null} options.canvas - place renderer in this canvas
+ * @param {HTMLElement=document.body} options.parent - if no canvas is provided, use parent to provide parent for generated canvas; otherwise uses document.body
+ * @param {number=null} options.aspectRatio - resizing will maintain aspect ratio by ensuring that the smaller dimension fits
+ * @param {boolean=false} options.autoresize - automatically calls resize during resize events
+ * @param {number=0xffffff} options.color - background color in hex
+ * @param {boolean=true} options.antialias - turn on antialias; if native antialias is not used, uses FXAA
+ * @param {boolean=false} options.forceFXAA - forces FXAA antialiasing to be used over native. FXAA is faster, but may not always look as great
+ * @param {number=1} options.resolution / device pixel ratio of the renderer (e.g., original retina is 2)
+ * @param {boolean=true} options.clearBeforeRender - sets if the CanvasRenderer will clear the canvas or before the render pass. If you wish to set this to false, you *must* set preserveDrawingBuffer to `true`.
+ * @param {boolean=false} options.preserveDrawingBuffer - enables drawing buffer preservation, enable this if you need to call toDataUrl on the webgl context.
+ * @param {boolean=false} options.roundPixels - if true PIXI will Math.floor() x/y values when rendering, stopping pixel interpolation
+ * @param {object} options.styles - apply these CSS styles to the div
+ * @param {boolean=false} options.debug - show debug panels (uses github.com/davidfig/debug)
+ * @param {string} options.panel - name for debug panel
+ * @param {string='bottomRight'} options.side for debug panel ('bottomRight', 'bottomLeft', 'topLeft', or 'topRight')
+*/
 function Renderer(options)
 {
     options = options || {};
@@ -54,6 +57,7 @@ function Renderer(options)
         this.canvas.style.left = this.canvas.style.top = '0px';
         this.canvas.style.overflow = 'auto';
     }
+    this.alwaysRender = options.alwaysRender || false;
     options.view = this.canvas;
     this.stage = new PIXI.Container();
     var noWebGL = options.noWebGL || false;
@@ -125,7 +129,7 @@ Renderer.prototype.update = function ()
     if (this.dirty)
     {
         this.render();
-        this.dirty = false;
+        this.dirty = this.alwaysRender;
     }
 };
 
