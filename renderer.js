@@ -115,7 +115,7 @@ Renderer.prototype.render = function()
 // render the scene
 Renderer.prototype.update = function ()
 {
-    if (this.debug && this.dirty !== this.last)
+    if (this.debug && (this.dirty || this.last))
     {
         var count = this.countObjects();
         if (this.last !== this.dirty || count !== this.lastCount)
