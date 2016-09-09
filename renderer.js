@@ -97,7 +97,7 @@ function Renderer(options)
     {
         window.addEventListener('resize', this.resize.bind(this));
     }
-    Update.add(this.update.bind(this), null, {percent: options.panel || 'PIXI'});
+    Update.add(this.update.bind(this), {percent: options.panel || 'PIXI'});
     if (this.autoresize)
     {
         window.addEventListener('resize', this.resize.bind(this));
