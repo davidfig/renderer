@@ -1,36 +1,39 @@
-/*
-    renderer.js <https://github.com/davidfig/renderer>
-    License: MIT license <https://github.com/davidfig/renderer/blob/master/LICENSE>
-    Author: David Figatner
-    Copyright (c) 2016 YOPEY YOPEY LLC
-*/
+/**
+ * @file renderer.js
+ * @author David Figatner
+ * @license MIT
+ * @copyright YOPEY YOPEY LLC 2016
+ * {@link https://github.com/davidfig/update}
+ */
 
+// placeholder for Debug and Update modules (@see {@link http://github.com/davidfig/debug} and {@link http://github.com/davidfig/update})
 let Debug, Update;
 
-/**
- * Wrapper for a PIXI.js Renderer
- * @param {object} [options]
- * @param {boolean} [options.alwaysRender=false] update renderer every update tick
- * @param {boolean} [options.noWebGL=false] use the PIXI.CanvasRenderer instead of PIXI.WebGLRenderer
- * @param {HTMLCanvasElement} [options.canvas] place renderer in this canvas
- * @param {HTMLElement} [options.parent=document.body] if no canvas is provided, use parent to provide parent for generated canvas; otherwise uses document.body
- * @param {number} [options.aspectRatio] resizing will maintain aspect ratio by ensuring that the smaller dimension fits
- * @param {boolean} [options.autoresize] automatically calls resize during resize events
- * @param {number} [options.color=0xffffff] background color in hex
- * @param {boolean} [options.antialias=true] turn on antialias; if native antialias is not used, uses FXAA
- * @param {boolean} [options.forceFXAA=false] forces FXAA antialiasing to be used over native. FXAA is faster, but may not always look as great
- * @param {number} [options.resolution=1] / device pixel ratio of the renderer (e.g., original retina is 2)
- * @param {boolean} [options.clearBeforeRender=true] sets if the CanvasRenderer will clear the canvas or before the render pass. If you wish to set this to false, you *must* set preserveDrawingBuffer to `true`.
- * @param {boolean} [options.preserveDrawingBuffer=false] enables drawing buffer preservation, enable this if you need to call toDataUrl on the webgl context.
- * @param {boolean} [options.roundPixels=false] if true PIXI will Math.floor() x/y values when rendering, stopping pixel interpolation
- * @param {object} [options.styles] apply these CSS styles to the div
- * @param {object} [options.debug] pass Debug from github.com/davidfig/debug
- * @param {string} [options.panel] name for debug panel
- * @param {string} [options.side='bottomRight'] for debug panel ('bottomRight', 'bottomLeft', 'topLeft', or 'topRight')
- * @param {object} [options.update] pass Update from github.com/davidfig/update
-*/
+/** Wrapper for a PIXI.js Renderer */
 class Renderer
 {
+    /**
+     * Wrapper for a PIXI.js Renderer
+     * @param {object} [options]
+     * @param {boolean} [options.alwaysRender=false] update renderer every update tick
+     * @param {boolean} [options.noWebGL=false] use the PIXI.CanvasRenderer instead of PIXI.WebGLRenderer
+     * @param {HTMLCanvasElement} [options.canvas] place renderer in this canvas
+     * @param {HTMLElement} [options.parent=document.body] if no canvas is provided, use parent to provide parent for generated canvas; otherwise uses document.body
+     * @param {number} [options.aspectRatio] resizing will maintain aspect ratio by ensuring that the smaller dimension fits
+     * @param {boolean} [options.autoresize] automatically calls resize during resize events
+     * @param {number} [options.color=0xffffff] background color in hex
+     * @param {boolean} [options.antialias=true] turn on antialias; if native antialias is not used, uses FXAA
+     * @param {boolean} [options.forceFXAA=false] forces FXAA antialiasing to be used over native. FXAA is faster, but may not always look as great
+     * @param {number} [options.resolution=1] / device pixel ratio of the renderer (e.g., original retina is 2)
+     * @param {boolean} [options.clearBeforeRender=true] sets if the CanvasRenderer will clear the canvas or before the render pass. If you wish to set this to false, you *must* set preserveDrawingBuffer to `true`.
+     * @param {boolean} [options.preserveDrawingBuffer=false] enables drawing buffer preservation, enable this if you need to call toDataUrl on the webgl context.
+     * @param {boolean} [options.roundPixels=false] if true PIXI will Math.floor() x/y values when rendering, stopping pixel interpolation
+     * @param {object} [options.styles] apply these CSS styles to the div
+     * @param {object} [options.debug] pass Debug from github.com/davidfig/debug
+     * @param {string} [options.panel] name for debug panel
+     * @param {string} [options.side='bottomRight'] for debug panel ('bottomRight', 'bottomLeft', 'topLeft', or 'topRight')
+     * @param {object} [options.update] pass Update from github.com/davidfig/update
+    */
     constructor(options)
     {
         options = options || {};
@@ -115,7 +118,6 @@ class Renderer
         this.resize(true);
     }
 
-
     /** force an immediate render without checking dirty flag */
     render()
     {
@@ -191,7 +193,7 @@ class Renderer
      */
     addChild(object)
     {
-        this.add(object);
+        return this.add(object);
     }
 
     /**
@@ -201,7 +203,7 @@ class Renderer
      */
     addChildTo(object, to)
     {
-        this.add(object, to);
+        return this.add(object, to);
     }
 
     /**
