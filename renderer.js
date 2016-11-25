@@ -42,6 +42,8 @@ class Renderer
         if (!this.canvas)
         {
             this.canvas = document.createElement('canvas');
+            this.canvas.style.width = '100%';
+            this.canvas.style.height = '100%';
             if (options.parent)
             {
                 options.parent.appendChild(this.canvas);
@@ -51,12 +53,8 @@ class Renderer
             {
                 document.body.appendChild(this.canvas);
             }
-            var w = window,
-                d = document,
-                e = d.documentElement,
-                g = d.getElementsByTagName('body')[0];
-            var width = w.innerWidth || e.clientWidth || g.clientWidth;
-            var height = w.innerHeight|| e.clientHeight|| g.clientHeight;
+            var width = this.canvas.offsetWidth;
+            var height = this.canvas.offsetHeight;
             this.canvas.style.position = 'absolute';
             this.canvas.style.width = width + 'px';
             this.canvas.style.height = height + 'px';
@@ -229,12 +227,8 @@ class Renderer
      */
     resize(force)
     {
-        var w = window,
-            d = document,
-            e = d.documentElement,
-            g = d.getElementsByTagName('body')[0];
-        var width = w.innerWidth || e.clientWidth || g.clientWidth;
-        var height = w.innerHeight|| e.clientHeight|| g.clientHeight;
+        var width = this.canvas.offsetWidth;
+        var height = this.canvas.offsetHeight;
         if (this.aspectRatio)
         {
             if (width > height)
