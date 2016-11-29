@@ -1,9 +1,8 @@
 const PIXI = require('pixi.js');
-const Easing = require('penner');
 const Debug = require('yy-debug');
 const Update = require('yy-update');
 const Animate = require('yy-animate');
-const Renderer = require('yy-renderer');
+const Renderer = require('../renderer/renderer.js');
 
 // debug panel on the bottom right
 Debug.init();
@@ -40,7 +39,7 @@ function next(t)
     var alpha = 0.5 * Math.random();
     var rotation = Math.random() * Math.PI * 2;
     var time = 1000 + Math.random() * 4000;
-    new Animate.to(t, {alpha: alpha, x: x, y: y, scale: {x: scaleX, y: scaleY}, rotation: rotation}, time, {renderer: renderer, ease: Easing.easeInOutSine});
+    new Animate.to(t, {alpha: alpha, x: x, y: y, scale: {x: scaleX, y: scaleY}, rotation: rotation}, time, {renderer: renderer, ease: 'easeInOutSine'});
 }
 
 // animate all objects
