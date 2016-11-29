@@ -20,7 +20,7 @@ class Renderer
      * @param {HTMLCanvasElement} [options.canvas] place renderer in this canvas
      * @param {HTMLElement} [options.parent=document.body] if no canvas is provided, use parent to provide parent for generated canvas; otherwise uses document.body
      * @param {number} [options.aspectRatio] resizing will maintain aspect ratio by ensuring that the smaller dimension fits
-     * @param {boolean} [options.autoresize] automatically calls resize during resize events
+     * @param {boolean} [options.autoresize=false] automatically calls resize during resize events
      * @param {number} [options.color=0xffffff] background color in hex
      * @param {boolean} [options.antialias=true] turn on antialias; if native antialias is not used, uses FXAA
      * @param {boolean} [options.forceFXAA=false] forces FXAA antialiasing to be used over native. FXAA is faster, but may not always look as great
@@ -56,8 +56,6 @@ class Renderer
             var width = this.canvas.offsetWidth;
             var height = this.canvas.offsetHeight;
             this.canvas.style.position = 'absolute';
-            this.canvas.style.width = width + 'px';
-            this.canvas.style.height = height + 'px';
             this.canvas.width = width * this.resolution;
             this.canvas.height = height * this.resolution;
             this.canvas.style.left = this.canvas.style.top = '0px';
@@ -105,11 +103,7 @@ class Renderer
             Update = options.update;
             Update.add(this.update.bind(this), {percent: options.panel || 'PIXI'});
         }
-        if (options.resize)
-        {
-            window.addEventListener('resize', this.resize.bind(this));
-        }
-        if (this.autoresize)
+        if (this.autoResize)
         {
             window.addEventListener('resize', this.resize.bind(this));
         }
@@ -244,8 +238,8 @@ class Renderer
         {
             this.width = width;
             this.height = height;
-            this.canvas.style.width = width + 'px';
-            this.canvas.style.height = height + 'px';
+            this.canvas.width = width;
+            this.canvas.height = height;
             this.renderer.resize(this.width, this.height);
             this.landscape = this.width > this.height;
             this.dirty = true;
