@@ -174,7 +174,10 @@ class Renderer
      */
     add(object, to)
     {
-        to = to || this.stage.children.length;
+        if (typeof to === 'undefined')
+        {
+            to = this.stage.children.length;
+        }
         this.stage.addChildAt(object, to);
         return object;
     }
