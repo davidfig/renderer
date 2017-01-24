@@ -10,7 +10,7 @@
 let Debug, Update;
 
 /** Wrapper for a PIXI.js Renderer */
-class Renderer
+export default class Renderer
 {
     /**
      * Wrapper for a PIXI.js Renderer
@@ -24,21 +24,21 @@ class Renderer
      * @param {number} [options.color=0xffffff] background color in hex
      * @param {boolean} [options.antialias=true] turn on antialias; if native antialias is not used, uses FXAA
      * @param {boolean} [options.forceFXAA=false] forces FXAA antialiasing to be used over native. FXAA is faster, but may not always look as great
-     * @param {number} [options.resolution=1] / device pixel ratio of the renderer (e.g., original retina is 2)
+     * @param {number} [options.resolution=window.devicePixelRatio] / device pixel ratio of the renderer (e.g., original retina is 2)
      * @param {boolean} [options.clearBeforeRender=true] sets if the CanvasRenderer will clear the canvas or before the render pass. If you wish to set this to false, you *must* set preserveDrawingBuffer to `true`.
      * @param {boolean} [options.preserveDrawingBuffer=false] enables drawing buffer preservation, enable this if you need to call toDataUrl on the webgl context.
      * @param {boolean} [options.roundPixels=false] if true PIXI will Math.floor() x/y values when rendering, stopping pixel interpolation
      * @param {object} [options.styles] apply these CSS styles to the div
-     * @param {object} [options.debug] pass Debug from github.com/davidfig/debug
-     * @param {string} [options.panel] name for debug panel
-     * @param {string} [options.side='bottomRight'] for debug panel ('bottomRight', 'bottomLeft', 'topLeft', or 'topRight')
      * @param {object} [options.update] pass Update from github.com/davidfig/update
+     * @param {object} [options.debug] pass Debug from github.com/davidfig/debug
+     * @param {string} [options.debugPanel] name for debug panel
+     * @param {string} [options.debugSide='bottomRight'] for debug panel ('bottomRight', 'bottomLeft', 'topLeft', or 'topRight')
     */
     constructor(options)
     {
         options = options || {};
         this.canvas = options.canvas;
-        options.resolution = this.resolution = options.resolution || 1;
+        options.resolution = this.resolution = options.resolution || window.devicePixelRatio || 1;
         if (!this.canvas)
         {
             this.canvas = document.createElement('canvas');
@@ -94,14 +94,14 @@ class Renderer
         if (options.debug)
         {
             Debug = options.debug;
-            var name = options.panel || 'PIXI';
-            this.debug = Debug.add(name, {side: options.side, text: name + ': <span style="background:white">X</span> 0 objects'});
+            var name = options.debugPanel || 'PIXI';
+            this.debug = Debug.add(name, {side: options.debugSide, text: name + ': <span style="background:white">X</span> 0 objects'});
             this.debug.name = name;
         }
         if (options.update)
         {
             Update = options.update;
-            Update.add(this.update.bind(this), {percent: options.panel || 'PIXI'});
+            Update.add(this.update.bind(this), {percent: options.debug ? options.debugPanel || 'PIXI' : null});
         }
         if (this.autoResize)
         {
@@ -241,8 +241,8 @@ class Renderer
         {
             this.width = width;
             this.height = height;
-            this.canvas.width = width;
-            this.canvas.height = height;
+            this.canvas.width = width * this.resolution;
+            this.canvas.height = height * this.resolution;
             this.renderer.resize(this.width, this.height);
             this.landscape = this.width > this.height;
             this.dirty = true;
@@ -267,8 +267,6 @@ class Renderer
         return (this.landscape ? this.width : this.height);
     }
 }
-
-module.exports = Renderer;
 
 // for eslint
 /* globals document, window */
