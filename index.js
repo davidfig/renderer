@@ -1,8 +1,8 @@
-const PIXI = require('pixi.js');
-const Debug = require('yy-debug');
-const Update = require('yy-update');
-const Animate = require('yy-animate');
-const Renderer = require('../renderer/renderer.js');
+import * as PIXI from 'pixi.js';
+import * as Debug from 'yy-debug';
+import * as Update from 'yy-update';
+import * as Animate from 'yy-animate';
+import Renderer from '../renderer/renderer.js';
 
 // debug panel on the bottom right
 Debug.init();
@@ -13,9 +13,7 @@ Animate.init({update: Update, debug: Debug});
 Update.update();
 
 // creates the renderer
-const resolution = window.devicePixelRatio;
-const renderer = new Renderer({autoresize: true, resolution: resolution, debug: Debug, update: Update});
-renderer.canvas.style.pointerEvents = 'none';
+const renderer = new Renderer({debug: Debug, update: Update, style: {pointerEvents: 'none'}});
 
 // set initial position for all triangles
 for (var i = 0; i < 100; i++)
