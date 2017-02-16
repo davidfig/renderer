@@ -10,7 +10,7 @@
 let Debug, Update;
 
 /** Wrapper for a PIXI.js Renderer */
-export default class Renderer
+class Renderer
 {
     /**
      * Wrapper for a PIXI.js Renderer
@@ -267,6 +267,8 @@ export default class Renderer
         return (this.landscape ? this.width : this.height);
     }
 }
+
+module.exports = Renderer;
 
 // for eslint
 /* globals document, window */
