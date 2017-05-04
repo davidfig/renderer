@@ -33,6 +33,7 @@ class Renderer
      * @param {object} [options.debug] pass Debug from github.com/davidfig/debug
      * @param {string} [options.debugPanel] name for debug panel
      * @param {string} [options.debugSide='bottomRight'] for debug panel ('bottomRight', 'bottomLeft', 'topLeft', or 'topRight')
+     * @param {number} [options.FPS=60] desired FPS for rendering
     */
     constructor(options)
     {
@@ -107,6 +108,15 @@ class Renderer
         {
             window.addEventListener('resize', this.resize.bind(this));
         }
+        if (options.FPS)
+        {
+            this.FPS = 1000 / options.FPS;
+        }
+        else
+        {
+            this.FPS = 1000 / 60;
+        }
+        this.time = 0;
         this.resize(true);
     }
 
@@ -114,12 +124,15 @@ class Renderer
     render()
     {
         this.renderer.render(this.stage);
+        this.time = 0;
     }
 
     /** render the scene */
-    update()
+    update(elapsed)
     {
-        if (this.debug && (this.dirty || this.last))
+        this.time += elapsed;
+        const FPS = this.time >= this.FPS;
+        if (this.debug && FPS && (this.dirty || this.last))
         {
             var count = this.countObjects();
             if (this.last !== this.dirty || count !== this.lastCount)
@@ -130,8 +143,9 @@ class Renderer
                 this.lastCount = count;
             }
         }
-        if (this.dirty)
+        if (this.dirty && FPS)
         {
+            this.time = 0;
             this.render();
             this.dirty = this.alwaysRender;
         }
