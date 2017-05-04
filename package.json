@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "serve -p 3001",
-    "build": "webpack --config webpack.config.js"
+    "build": "browserify -d index.js > index.compiled.js",
+    "watch": "watchify index.js -o index.compiled.js"
   },
   "repository": {
     "type": "git",
