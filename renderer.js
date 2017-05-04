@@ -33,7 +33,7 @@ class Renderer
      * @param {object} [options.debug] pass Debug from github.com/davidfig/debug
      * @param {string} [options.debugPanel] name for debug panel
      * @param {string} [options.debugSide='bottomRight'] for debug panel ('bottomRight', 'bottomLeft', 'topLeft', or 'topRight')
-     * @param {number} [options.FPS=60] desired FPS for rendering
+     * @param {number} [options.FPS=60] desired FPS for rendering (otherwise as fast as possible)
     */
     constructor(options)
     {
@@ -114,7 +114,7 @@ class Renderer
         }
         else
         {
-            this.FPS = 1000 / 60;
+            this.FPS = 0;
         }
         this.time = 0;
         this.resize(true);
@@ -132,15 +132,24 @@ class Renderer
     {
         this.time += elapsed;
         const FPS = this.time >= this.FPS;
-        if (this.debug && FPS && (this.dirty || this.last))
+        if (this.debug)
         {
             var count = this.countObjects();
-            if (this.last !== this.dirty || count !== this.lastCount)
+            if (this.dirty && FPS)
             {
-                var color = this.dirty ? 'white' : 'gray';
+                if (this.last !== this.dirty || count !== this.lastCount)
+                {
+                    var color = this.dirty ? 'white' : 'gray';
+                    Debug.one(this.debug.name + ': <span style="background: ' + color + '; color: ' + color + '">X</span> ' + count + ' objects', {panel: this.debug});
+                    this.last = this.dirty;
+                    this.lastCount = count;
+                }
+            }
+            else if (this.last)
+            {
+                var color = 'gray';
                 Debug.one(this.debug.name + ': <span style="background: ' + color + '; color: ' + color + '">X</span> ' + count + ' objects', {panel: this.debug});
-                this.last = this.dirty;
-                this.lastCount = count;
+                this.last = false;
             }
         }
         if (this.dirty && FPS)
