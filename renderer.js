@@ -62,7 +62,7 @@ class Renderer
             this.canvas.style.left = this.canvas.style.top = '0px';
             this.canvas.style.overflow = 'auto';
         }
-        this.alwaysRender = options.alwaysRender || false;
+        this.dirty = this.alwaysRender = options.alwaysRender || false;
         options.view = this.canvas;
         this.stage = new PIXI.Container();
         var noWebGL = options.noWebGL || false;
