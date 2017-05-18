@@ -76,7 +76,7 @@ class Renderer
             options.transparent = true;
         }
         options.antialias = (typeof options.antialias === 'undefined') ? true : options.antialias;
-        this.renderer = new Renderer(width, height, options);
+        this.renderer = new Renderer(options);
         document.body.appendChild(this.renderer.view);
         if (options.color)
         {
