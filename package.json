@@ -1,6 +1,6 @@
 {
   "name": "yy-renderer",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "wrapper for PIXI.Renderer class ",
   "main": "renderer.js",
   "scripts": {
