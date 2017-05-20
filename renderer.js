@@ -106,7 +106,6 @@ class Renderer
         if (this.autoResize)
         {
             window.addEventListener('resize', this.resize.bind(this));
-            this.resize(true);
         }
         if (options.FPS)
         {
@@ -117,6 +116,7 @@ class Renderer
             this.FPS = 0;
         }
         this.time = 0;
+        this.resize(true);
     }
 
     /** force an immediate render without checking dirty flag */
