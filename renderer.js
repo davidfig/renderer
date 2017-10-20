@@ -1,183 +1,162 @@
-/**
- * @file renderer.js
- * @author David Figatner
- * @license MIT
- * @copyright YOPEY YOPEY LLC 2016
- * {@link https://github.com/davidfig/update}
- */
+// yy-renderer
+// by David Figatner
+// (c) YOPEY YOPEY LLC 2017
+// MIT License
+// https://github.com/davidfig/update
 
-// placeholder for Debug and Update modules (@see {@link http://github.com/davidfig/debug} and {@link http://github.com/davidfig/update})
-let Debug, Update;
+const PIXI = require('pixi.js')
+const FPS = require('yy-fps')
+const Loop = require('yy-loop')
+const exists = require('exists')
 
-/** Wrapper for a PIXI.js Renderer */
-class Renderer
+class Renderer extends Loop
 {
     /**
-     * Wrapper for a PIXI.js Renderer
+     * Wrapper for a pixi.js Renderer
      * @param {object} [options]
+     * @param {boolean|string} [options.debug] turns on FPS indicator
      * @param {boolean} [options.alwaysRender=false] update renderer every update tick
-     * @param {boolean} [options.noWebGL=false] use the PIXI.CanvasRenderer instead of PIXI.WebGLRenderer
+     * @param {number} [options.FPS=60] desired FPS for rendering (otherwise render on every tick)
+     *
      * @param {HTMLCanvasElement} [options.canvas] place renderer in this canvas
-     * @param {HTMLElement} [options.parent=document.body] if no canvas is provided, use parent to provide parent for generated canvas; otherwise uses document.body
+     * @param {HTMLElement} [options.parent=document.body] if no canvas is provided, use parent to provide parent for generated canvas otherwise uses document.body
+     * @param {object} [options.styles] apply these CSS styles to the div
+     *
      * @param {number} [options.aspectRatio] resizing will maintain aspect ratio by ensuring that the smaller dimension fits
      * @param {boolean} [options.autoresize=false] automatically calls resize during resize events
      * @param {number} [options.color=0xffffff] background color in hex
-     * @param {boolean} [options.antialias=true] turn on antialias; if native antialias is not used, uses FXAA
+     *
+     * @param {boolean} [options.noWebGL=false] use the PIXI.CanvasRenderer instead of PIXI.WebGLRenderer
+     * @param {boolean} [options.antialias=true] turn on antialias if native antialias is not used, uses FXAA
      * @param {boolean} [options.forceFXAA=false] forces FXAA antialiasing to be used over native. FXAA is faster, but may not always look as great
      * @param {number} [options.resolution=window.devicePixelRatio] / device pixel ratio of the renderer (e.g., original retina is 2)
      * @param {boolean} [options.clearBeforeRender=true] sets if the CanvasRenderer will clear the canvas or before the render pass. If you wish to set this to false, you *must* set preserveDrawingBuffer to `true`.
      * @param {boolean} [options.preserveDrawingBuffer=false] enables drawing buffer preservation, enable this if you need to call toDataUrl on the webgl context.
      * @param {boolean} [options.roundPixels=false] if true PIXI will Math.floor() x/y values when rendering, stopping pixel interpolation
-     * @param {object} [options.styles] apply these CSS styles to the div
-     * @param {object} [options.update] pass Update from github.com/davidfig/update
-     * @param {object} [options.debug] pass Debug from github.com/davidfig/debug
-     * @param {string} [options.debugPanel] name for debug panel
-     * @param {string} [options.debugSide='bottomRight'] for debug panel ('bottomRight', 'bottomLeft', 'topLeft', or 'topRight')
-     * @param {number} [options.FPS=60] desired FPS for rendering (otherwise as fast as possible)
-    */
+     *
+     ** from yy-loop:
+     * @param {number} [options.maxFrameTime=1000/60] maximum time in milliseconds for a frame
+     * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
+     *
+     * @event each(elapsed, Loop, elapsedInLoop)
+     * @event start(Loop)
+     * @event stop(Loop)
+     */
     constructor(options)
     {
-        options = options || {};
-        this.canvas = options.canvas;
-        options.resolution = this.resolution = options.resolution || window.devicePixelRatio || 1;
-        if (!this.canvas)
-        {
-            this.canvas = document.createElement('canvas');
-            this.canvas.style.width = '100%';
-            this.canvas.style.height = '100%';
-            if (options.parent)
-            {
-                options.parent.appendChild(this.canvas);
-                options.parent = null;
-            }
-            else
-            {
-                document.body.appendChild(this.canvas);
-            }
-            var width = this.canvas.offsetWidth;
-            var height = this.canvas.offsetHeight;
-            this.canvas.style.position = 'absolute';
-            this.canvas.width = width * this.resolution;
-            this.canvas.height = height * this.resolution;
-            this.canvas.style.left = this.canvas.style.top = '0px';
-            this.canvas.style.overflow = 'auto';
-        }
-        this.dirty = this.alwaysRender = options.alwaysRender || false;
-        options.view = this.canvas;
-        this.stage = new PIXI.Container();
-        var noWebGL = options.noWebGL || false;
-        options.noWebGL = null;
-        this.autoResize = options.autoresize;
-        options.autoresize = null;
-        var Renderer = noWebGL ? PIXI.CanvasRenderer : PIXI.WebGLRenderer;
-        this.aspectRatio = options.aspectRatio;
-        if (typeof options.color === 'undefined')
-        {
-            options.transparent = true;
-        }
-        options.antialias = (typeof options.antialias === 'undefined') ? true : options.antialias;
-        this.renderer = new Renderer(options);
+        options = options || {}
+        super({ pauseOnBlur: options.pauseOnBlur, maxFrameTime: options.maxFrameTime })
+        this.canvas = options.canvas
+        this.autoResize = options.autoresize
+        this.aspectRatio = options.aspectRatio
+        this.FPS = exists(options.FPS) ? 1000 / options.FPS : 0
+        options.resolution = this.resolution = options.resolution || window.devicePixelRatio || 1
+        options.antialias = exists(options.antialias) ? options.antialias : true
+        options.transparent = true
+        if (!this.canvas) this.createCanvas(options)
+        options.view = this.canvas
+
+        const noWebGL = options.noWebGL || false
+        options.noWebGL = null
+        options.autoresize = null
+        const Renderer = noWebGL ? PIXI.CanvasRenderer : PIXI.WebGLRenderer
+
+        this.renderer = new Renderer(options)
         if (options.color)
         {
-            this.renderer.backgroundColor = options.color;
+            this.renderer.backgroundColor = options.color
         }
         if (options.styles)
         {
-            for (var style in options.styles)
+            for (let style in options.styles)
             {
-                this.canvas.style[style] = options.styles[style];
+                this.canvas.style[style] = options.styles[style]
             }
         }
-        this.width = 0;
-        this.height = 0;
-        this.offset = new PIXI.Point();
-        if (options.debug)
+
+        if (options.debug) this.fps = new FPS({ FPS: options.FPS })
+        if (this.autoResize) window.addEventListener('resize', this.resize.bind(this))
+        this.time = 0
+        this.stage = new PIXI.Container()
+        this.dirty = this.alwaysRender = options.alwaysRender || false
+        this.resize(true)
+        this.interval(this.updateRenderer.bind(this), this.FPS)
+    }
+
+    /**
+     * create canvas if one is not provided
+     * @private
+     */
+    createCanvas(options)
+    {
+        this.canvas = document.createElement('canvas')
+        this.canvas.style.width = '100%'
+        this.canvas.style.height = '100%'
+        if (options.parent)
         {
-            Debug = options.debug;
-            var name = options.debugPanel || 'PIXI';
-            this.debug = Debug.add(name, {side: options.debugSide, text: name + ': <span style="background:white">X</span> 0 objects'});
-            this.debug.name = name;
-        }
-        if (options.update)
-        {
-            Update = options.update;
-            Update.add(this.update.bind(this), {percent: options.debug ? options.debugPanel || 'PIXI' : null});
-        }
-        if (this.autoResize)
-        {
-            window.addEventListener('resize', this.resize.bind(this));
-        }
-        if (options.FPS)
-        {
-            this.FPS = 1000 / options.FPS;
+            options.parent.appendChild(this.canvas)
+            options.parent = null
         }
         else
         {
-            this.FPS = 0;
+            document.body.appendChild(this.canvas)
         }
-        this.time = 0;
-        this.resize(true);
+        var width = this.canvas.offsetWidth
+        var height = this.canvas.offsetHeight
+        this.canvas.style.position = 'absolute'
+        this.canvas.width = width * this.resolution
+        this.canvas.height = height * this.resolution
+        this.canvas.style.left = this.canvas.style.top = '0px'
+        this.canvas.style.overflow = 'auto'
     }
 
-    /** force an immediate render without checking dirty flag */
+    /**
+     * immediately render without checking dirty flag
+     */
     render()
     {
-        this.renderer.render(this.stage);
-        this.time = 0;
+        this.renderer.render(this.stage)
+        this.dirty = this.alwaysRender
     }
 
-    /** render the scene */
-    update(elapsed)
+    /**
+     * render the scene
+     * @private
+     */
+    updateRenderer()
     {
-        this.time += elapsed;
-        const FPS = this.time >= this.FPS;
-        if (this.debug)
+        if (this.fps)
         {
-            var count = this.countObjects();
-            if (this.dirty && FPS)
-            {
-                if (this.last !== this.dirty || count !== this.lastCount)
-                {
-                    var color = this.dirty ? 'white' : 'gray';
-                    Debug.one(this.debug.name + ': <span style="background: ' + color + '; color: ' + color + '">X</span> ' + count + ' objects', {panel: this.debug});
-                    this.last = this.dirty;
-                    this.lastCount = count;
-                }
-            }
-            else if (this.last)
-            {
-                var color = 'gray';
-                Debug.one(this.debug.name + ': <span style="background: ' + color + '; color: ' + color + '">X</span> ' + count + ' objects', {panel: this.debug});
-                this.last = false;
-            }
+            this.fps.frame()
         }
-        if (this.dirty && FPS)
+        if (this.dirty)
         {
-            this.time = 0;
-            this.render();
-            this.dirty = this.alwaysRender;
+            this.render()
+            this.dirty = this.alwaysRender
         }
     }
 
-    /** counts visible objects */
+    /**
+     * counts visible objects
+     */
     countObjects()
     {
         function count(object)
         {
             if (!object.visible)
             {
-                return;
+                return
             }
-            total++;
+            total++
             for (var i = 0; i < object.children.length; i++)
             {
-                count(object.children[i]);
+                count(object.children[i])
             }
         }
 
-        var total = 0;
-        count(this.stage);
-        return total;
+        var total = 0
+        count(this.stage)
+        return total
     }
 
     /**
@@ -186,7 +165,7 @@ class Renderer
      */
     background(color)
     {
-        this.canvas.style.backgroundColor = color;
+        this.canvas.style.backgroundColor = color
     }
 
     /**
@@ -198,10 +177,10 @@ class Renderer
     {
         if (typeof to === 'undefined')
         {
-            to = this.stage.children.length;
+            to = this.stage.children.length
         }
-        this.stage.addChildAt(object, to);
-        return object;
+        this.stage.addChildAt(object, to)
+        return object
     }
 
     /**
@@ -210,7 +189,7 @@ class Renderer
      */
     addChild(object)
     {
-        return this.add(object);
+        return this.add(object)
     }
 
     /**
@@ -220,7 +199,7 @@ class Renderer
      */
     addChildTo(object, to)
     {
-        return this.add(object, to);
+        return this.add(object, to)
     }
 
     /**
@@ -229,7 +208,7 @@ class Renderer
      */
     remove(object)
     {
-        this.stage.removeChild(object);
+        this.stage.removeChild(object)
     }
 
     /**
@@ -237,7 +216,7 @@ class Renderer
      */
     clear()
     {
-        this.stage.removeChildren();
+        this.stage.removeChildren()
     }
 
     /**
@@ -246,28 +225,28 @@ class Renderer
      */
     resize(force)
     {
-        var width = this.canvas.offsetWidth;
-        var height = this.canvas.offsetHeight;
+        var width = this.canvas.offsetWidth
+        var height = this.canvas.offsetHeight
         if (this.aspectRatio)
         {
             if (width > height)
             {
-                width = height * this.aspectRatio;
+                width = height * this.aspectRatio
             }
             else
             {
-                height = width / this.aspectRatio;
+                height = width / this.aspectRatio
             }
         }
         if (force || width !== this.width || height !== this.height)
         {
-            this.width = width;
-            this.height = height;
-            this.canvas.width = width * this.resolution;
-            this.canvas.height = height * this.resolution;
-            this.renderer.resize(this.width, this.height);
-            this.landscape = this.width > this.height;
-            this.dirty = true;
+            this.width = width
+            this.height = height
+            this.canvas.width = width * this.resolution
+            this.canvas.height = height * this.resolution
+            this.renderer.resize(this.width, this.height)
+            this.landscape = this.width > this.height
+            this.dirty = true
         }
     }
 
@@ -277,7 +256,7 @@ class Renderer
      */
     dimensionSmall()
     {
-        return (this.landscape ? this.height : this.width);
+        return (this.landscape ? this.height : this.width)
     }
 
     /**
@@ -286,11 +265,75 @@ class Renderer
      */
     dimensionBig()
     {
-        return (this.landscape ? this.width : this.height);
+        return (this.landscape ? this.width : this.height)
     }
+
+    /**
+     * start the internal loop
+     * @inherited from yy-loop
+     * @returns {Renderer} this
+     */
+    // start()
+
+    /**
+     * stop the internal loop
+     * @inherited from yy-loop
+     * @returns {Renderer} this
+     */
+    // stop()
+
+    /**
+     * loop through updates; can be called manually each frame, or called automatically as part of start()
+     * @inherited from yy-loop
+     */
+    // update()
+
+    /**
+     * adds a callback to the loop
+     * @inherited from yy-loop
+     * @param {function} callback
+     * @param {number} [time=0] in milliseconds to call this update (0=every frame)
+     * @param {number} [count=0] number of times to run this update (0=infinite)
+     * @return {object} entry - used to remove or change the parameters of the update
+     */
+    // interval(callback, time, count)
+
+    /**
+     * adds a one-time callback to the loop
+     * @inherited from yy-loop
+     * @param {function} callback
+     * @param {number} time in milliseconds to call this update
+     * @return {object} entry - used to remove or change the parameters of the update
+     */
+    // timeout(callback, time)
+
+    /**
+     * remove a callback from the loop
+     * @inherited from yy-loop
+     * @param {object} entry - returned by add()
+     */
+    removeInterval()
+    {
+        super.remove(...arguments)
+    }
+
+    /**
+     * @inherited from yy-loop
+     * removes all callbacks from the loop
+     */
+    // removeAll()
+
+    /**
+     * @inherited from yy-loop
+     * @type {number} count of all animations
+     */
+    // get count()
+
+    /**
+     * @inherited from yy-loop
+     * @type {number} count of running animations
+     */
+    // get countRunning()
 }
 
-module.exports = Renderer;
-
-// for eslint
-/* globals document, window */
+module.exports = Renderer

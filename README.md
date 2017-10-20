@@ -1,164 +1,196 @@
 ## renderer.js
-wrapper around the renderer for PIXI.js
+wrapper for pixi.js with automatic loop & clean/dirty settings 
+
+## simple example
+```
+    const Renderer = require('yy-renderer)
+
+    const renderer = new Renderer()
+
+    const sprite = renderer.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
+    sprite.tint = 0xff0000
+    sprite.width = sprite.height = 100
+
+    // starts renderer loop
+    renderer.start()
+
+    // do stuff
+
+    // sets renderer to dirty to update during next frame
+    renderer.dirty = true
+```
 
 ## Live Example
 https://davidfig.github.io/renderer/
-
-see also
-
-* https://davidfig.github.io/viewport/
 
 ## Installation
 
     npm i yy-renderer
 
-# API Reference
-## Functions
+## API Reference
+```
+    /**
+     * Wrapper for a pixi.js Renderer
+     * @param {object} [options]
+     * @param {boolean|string} [options.debug] turns on FPS indicator
+     * @param {boolean} [options.alwaysRender=false] update renderer every update tick
+     * @param {number} [options.FPS=60] desired FPS for rendering (otherwise render on every tick)
+     *
+     * @param {HTMLCanvasElement} [options.canvas] place renderer in this canvas
+     * @param {HTMLElement} [options.parent=document.body] if no canvas is provided, use parent to provide parent for generated canvas otherwise uses document.body
+     * @param {object} [options.styles] apply these CSS styles to the div
+     *
+     * @param {number} [options.aspectRatio] resizing will maintain aspect ratio by ensuring that the smaller dimension fits
+     * @param {boolean} [options.autoresize=false] automatically calls resize during resize events
+     * @param {number} [options.color=0xffffff] background color in hex
+     *
+     * @param {boolean} [options.noWebGL=false] use the PIXI.CanvasRenderer instead of PIXI.WebGLRenderer
+     * @param {boolean} [options.antialias=true] turn on antialias if native antialias is not used, uses FXAA
+     * @param {boolean} [options.forceFXAA=false] forces FXAA antialiasing to be used over native. FXAA is faster, but may not always look as great
+     * @param {number} [options.resolution=window.devicePixelRatio] / device pixel ratio of the renderer (e.g., original retina is 2)
+     * @param {boolean} [options.clearBeforeRender=true] sets if the CanvasRenderer will clear the canvas or before the render pass. If you wish to set this to false, you *must* set preserveDrawingBuffer to `true`.
+     * @param {boolean} [options.preserveDrawingBuffer=false] enables drawing buffer preservation, enable this if you need to call toDataUrl on the webgl context.
+     * @param {boolean} [options.roundPixels=false] if true PIXI will Math.floor() x/y values when rendering, stopping pixel interpolation
+     *
+     ** from yy-loop:
+     * @param {number} [options.maxFrameTime=1000/60] maximum time in milliseconds for a frame
+     * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
+     *
+     * @event each(elapsed, Loop, elapsedInLoop)
+     * @event start(Loop)
+     * @event stop(Loop)
+     */
+    constructor(options)
 
-<dl>
-<dt><a href="#render">render()</a></dt>
-<dd><p>force an immediate render without checking dirty flag</p>
-</dd>
-<dt><a href="#update">update()</a></dt>
-<dd><p>render the scene</p>
-</dd>
-<dt><a href="#countObjects">countObjects()</a></dt>
-<dd><p>counts visible objects</p>
-</dd>
-<dt><a href="#background">background(color)</a></dt>
-<dd><p>sets the background color</p>
-</dd>
-<dt><a href="#add">add(object, [to])</a></dt>
-<dd><p>adds object to stage</p>
-</dd>
-<dt><a href="#addChild">addChild(object)</a></dt>
-<dd><p>alias for add</p>
-</dd>
-<dt><a href="#addChildTo">addChildTo(object, to)</a></dt>
-<dd><p>alias for add</p>
-</dd>
-<dt><a href="#remove">remove(object)</a></dt>
-<dd><p>remove child from stage</p>
-</dd>
-<dt><a href="#clear">clear()</a></dt>
-<dd><p>clears the stage</p>
-</dd>
-<dt><a href="#resize">resize([force])</a></dt>
-<dd><p>resize</p>
-</dd>
-<dt><a href="#dimensionSmall">dimensionSmall()</a> ⇒ <code>number</code></dt>
-<dd><p>returns the smaller of the width/height based</p>
-</dd>
-<dt><a href="#dimensionBig">dimensionBig()</a> ⇒ <code>number</code></dt>
-<dd><p>returns the larger of the width/height based</p>
-</dd>
-</dl>
+    /**
+     * immediately render without checking dirty flag
+     */
+    render()
 
-<a name="render"></a>
+    /**
+     * counts visible objects
+     */
+    countObjects()
 
-## render()
-force an immediate render without checking dirty flag
+    /**
+     * sets the background color
+     * @param {string} color in CSS format
+     */
+    background(color)
 
-**Kind**: global function  
-<a name="update"></a>
+    /**
+     * adds object to stage
+     * @param {PIXI.DisplayObject} object
+     * @param {number} [to] index to add
+     */
+    add(object, to)
 
-## update()
-render the scene
+    /**
+     * alias for add
+     * @param {PIXI.DisplayObject} object
+     */
+    addChild(object)
 
-**Kind**: global function  
-<a name="countObjects"></a>
+    /**
+     * alias for add
+     * @param {PIXI.DisplayObject} object
+     * @param {number} to - index to add
+     */
+    addChildTo(object, to)
 
-## countObjects()
-counts visible objects
+    /**
+     * remove child from stage
+     * @param {PIXI.DisplayObject} object
+     */
+    remove(object)
 
-**Kind**: global function  
-<a name="background"></a>
+    /**
+     * clears the stage
+     */
+    clear()
 
-## background(color)
-sets the background color
+    /**
+     * resize
+     * @param {boolean} [force] resize, even if cached width/height remain unchanged
+     */
+    resize(force)
 
-**Kind**: global function  
+    /**
+     * returns the smaller of the width/height based
+     * @return {number}
+     */
+    dimensionSmall()
 
-| Param | Type | Description |
-| --- | --- | --- |
-| color | <code>string</code> | in CSS format |
+    /**
+     * returns the larger of the width/height based
+     * @return {number}
+     */
+    dimensionBig()
 
-<a name="add"></a>
+    /**
+     * start the internal loop
+     * @inherited from yy-loop
+     * @returns {Renderer} this
+     */
+    // start()
 
-## add(object, [to])
-adds object to stage
+    /**
+     * stop the internal loop
+     * @inherited from yy-loop
+     * @returns {Renderer} this
+     */
+    // stop()
 
-**Kind**: global function  
+    /**
+     * loop through updates; can be called manually each frame, or called automatically as part of start()
+     * @inherited from yy-loop
+     */
+    // update()
 
-| Param | Type | Description |
-| --- | --- | --- |
-| object | <code>PIXI.DisplayObject</code> |  |
-| [to] | <code>number</code> | index to add |
+    /**
+     * adds a callback to the loop
+     * @inherited from yy-loop
+     * @param {function} callback
+     * @param {number} [time=0] in milliseconds to call this update (0=every frame)
+     * @param {number} [count=0] number of times to run this update (0=infinite)
+     * @return {object} entry - used to remove or change the parameters of the update
+     */
+    // interval(callback, time, count)
 
-<a name="addChild"></a>
+    /**
+     * adds a one-time callback to the loop
+     * @inherited from yy-loop
+     * @param {function} callback
+     * @param {number} time in milliseconds to call this update
+     * @return {object} entry - used to remove or change the parameters of the update
+     */
+    // timeout(callback, time)
 
-## addChild(object)
-alias for add
+    /**
+     * remove a callback from the loop
+     * @inherited from yy-loop
+     * @param {object} entry - returned by add()
+     */
+    removeInterval()
 
-**Kind**: global function  
+    /**
+     * @inherited from yy-loop
+     * removes all callbacks from the loop
+     */
+    // removeAll()
 
-| Param | Type |
-| --- | --- |
-| object | <code>PIXI.DisplayObject</code> | 
+    /**
+     * @inherited from yy-loop
+     * @type {number} count of all animations
+     */
+    // get count()
 
-<a name="addChildTo"></a>
-
-## addChildTo(object, to)
-alias for add
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| object | <code>PIXI.DisplayObject</code> |  |
-| to | <code>number</code> | index to add |
-
-<a name="remove"></a>
-
-## remove(object)
-remove child from stage
-
-**Kind**: global function  
-
-| Param | Type |
-| --- | --- |
-| object | <code>PIXI.DisplayObject</code> | 
-
-<a name="clear"></a>
-
-## clear()
-clears the stage
-
-**Kind**: global function  
-<a name="resize"></a>
-
-## resize([force])
-resize
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| [force] | <code>boolean</code> | resize, even if cached width/height remain unchanged |
-
-<a name="dimensionSmall"></a>
-
-## dimensionSmall() ⇒ <code>number</code>
-returns the smaller of the width/height based
-
-**Kind**: global function  
-<a name="dimensionBig"></a>
-
-## dimensionBig() ⇒ <code>number</code>
-returns the larger of the width/height based
-
-**Kind**: global function  
-
-* * *
-
-Copyright (c) 2016 YOPEY YOPEY LLC - MIT License - Documented by [jsdoc-to-markdown](https://github.com/75lb/jsdoc-to-markdown)
+    /**
+     * @inherited from yy-loop
+     * @type {number} count of running animations
+     */
+    // get countRunning()
+```
+## license  
+MIT License  
+(c) 2017 [YOPEY YOPEY LLC](https://yopeyopey.com/) by [David Figatner](https://twitter.com/yopey_yopey/)
