@@ -12,7 +12,7 @@ let count = 100
 function test()
 {
     // creates the renderer, updating every frame
-    renderer = new Renderer({ debug: true, styles: { pointerEvents: 'none' }, FPS: 60})
+    renderer = new Renderer({ debug: true, styles: { pointerEvents: 'none' }, FPS: 60, pauseOnBlur: true})
 
     // set initial position for all triangles
     for (let i = 0; i < count; i++)
@@ -73,7 +73,7 @@ window.onload = function ()
     test()
     require('./highlight')('https://github.com/davidfig/renderer')
 }
-},{"..":391,"./highlight":2,"pixi-ease":191,"pixi.js":334,"yy-random":390}],2:[function(require,module,exports){
+},{"..":392,"./highlight":2,"pixi-ease":191,"pixi.js":334,"yy-random":391}],2:[function(require,module,exports){
 const forkMe = require('fork-me-github')
 
 module.exports = function highlight(url)
@@ -19264,7 +19264,7 @@ module.exports = class List extends Loop
      */
     // timeout(callback, time)
 }
-},{"./angle":192,"./face":193,"./load":195,"./movie":196,"./shake":197,"./target":198,"./tint":199,"./to":200,"./wait":201,"yy-loop":387}],195:[function(require,module,exports){
+},{"./angle":192,"./face":193,"./load":195,"./movie":196,"./shake":197,"./target":198,"./tint":199,"./to":200,"./wait":201,"yy-loop":388}],195:[function(require,module,exports){
 const wait = require('./wait')
 const to = require('./to')
 const tint = require('./tint')
@@ -33193,7 +33193,7 @@ var SpriteMaskFilter = function (_Filter) {
 
 exports.default = SpriteMaskFilter;
 
-},{"../../../../math":249,"../Filter":265,"path":393}],269:[function(require,module,exports){
+},{"../../../../math":249,"../Filter":265,"path":394}],269:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -36883,7 +36883,7 @@ function generateSampleSrc(maxTextures) {
     return src;
 }
 
-},{"../../Shader":223,"path":393}],287:[function(require,module,exports){
+},{"../../Shader":223,"path":394}],287:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -41991,7 +41991,7 @@ function determineCrossOrigin(url) {
     return '';
 }
 
-},{"url":399}],303:[function(require,module,exports){
+},{"url":400}],303:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -46558,7 +46558,7 @@ exports.default = TilingSpriteRenderer;
 
 core.WebGLRenderer.registerPlugin('tilingSprite', TilingSpriteRenderer);
 
-},{"../../core":244,"../../core/const":225,"path":393}],322:[function(require,module,exports){
+},{"../../core":244,"../../core/const":225,"path":394}],322:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47721,7 +47721,7 @@ var ColorMatrixFilter = function (_core$Filter) {
 exports.default = ColorMatrixFilter;
 ColorMatrixFilter.prototype.grayscale = ColorMatrixFilter.prototype.greyscale;
 
-},{"../../core":244,"path":393}],329:[function(require,module,exports){
+},{"../../core":244,"path":394}],329:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47831,7 +47831,7 @@ var DisplacementFilter = function (_core$Filter) {
 
 exports.default = DisplacementFilter;
 
-},{"../../core":244,"path":393}],330:[function(require,module,exports){
+},{"../../core":244,"path":394}],330:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47885,7 +47885,7 @@ var FXAAFilter = function (_core$Filter) {
 
 exports.default = FXAAFilter;
 
-},{"../../core":244,"path":393}],331:[function(require,module,exports){
+},{"../../core":244,"path":394}],331:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -48061,7 +48061,7 @@ var NoiseFilter = function (_core$Filter) {
 
 exports.default = NoiseFilter;
 
-},{"../../core":244,"path":393}],333:[function(require,module,exports){
+},{"../../core":244,"path":394}],333:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -48111,7 +48111,7 @@ var VoidFilter = function (_core$Filter) {
 
 exports.default = VoidFilter;
 
-},{"../../core":244,"path":393}],334:[function(require,module,exports){
+},{"../../core":244,"path":394}],334:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -50731,7 +50731,7 @@ function parse(resource, texture) {
     resource.bitmapFont = _extras.BitmapText.registerFont(resource.data, texture);
 }
 
-},{"../core":244,"../extras":320,"path":393,"resource-loader":373}],342:[function(require,module,exports){
+},{"../core":244,"../extras":320,"path":394,"resource-loader":373}],342:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -51089,7 +51089,7 @@ function getResourcePath(resource, baseUrl) {
     return _url2.default.resolve(resource.url.replace(baseUrl, ''), resource.data.meta.image);
 }
 
-},{"../core":244,"resource-loader":373,"url":399}],345:[function(require,module,exports){
+},{"../core":244,"resource-loader":373,"url":400}],345:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -52736,7 +52736,7 @@ exports.default = MeshRenderer;
 
 core.WebGLRenderer.registerPlugin('mesh', MeshRenderer);
 
-},{"../../core":244,"../Mesh":346,"path":393,"pixi-gl-core":208}],353:[function(require,module,exports){
+},{"../../core":244,"../Mesh":346,"path":394,"pixi-gl-core":208}],353:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -58077,7 +58077,7 @@ if ((typeof module) == 'object' && module.exports) {
   Math    // math: package containing random, pow, and seedrandom
 );
 
-},{"crypto":392}],383:[function(require,module,exports){
+},{"crypto":393}],383:[function(require,module,exports){
 // TinyColor v1.4.1
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
@@ -59859,14 +59859,129 @@ class Color
 };
 
 module.exports = new Color();
-},{"yy-random":390}],386:[function(require,module,exports){
+},{"yy-random":391}],386:[function(require,module,exports){
+// yy-counter
+// In-browser counter to watch changeable values like counters or FPS
+// David Figatner
+// (c) YOPEY YOPEY LLC 2017
+// MIT License
+// https://github.com/davidfig/counter
+
+module.exports = class Counter
+{
+    /**
+     * @param {object} [options]
+     * @param {string} [options.side=rightbottom] side to place the panel (combination of right/left and bottom/top)
+     * @param {number} [options.padding=7px]
+     * @param {string} [options.color=white]
+     * @param {string} [options.background=rgba(0,0,0,0.5)]
+     * @param {*} {options.xxx} where xxx is a CSS style for the div
+     */
+    constructor(options)
+    {
+        options = options || {}
+        options.side = options.side || 'rightbottom'
+        options.side.toLowerCase()
+        options.padding = options.padding || '7px'
+        options.color = options.color || 'white'
+        options.background = options.background || 'rgba(0,0,0,0.5)'
+        this.div = document.createElement('div')
+        Counter.findParent(options.side).appendChild(this.div)
+        for (let style in options)
+        {
+            if (style !== 'parent' && style !== 'side')
+            {
+                this.div.style[style] = options[style]
+            }
+        }
+    }
+
+    /**
+     * find the parent div for one of the corners
+     * @param {string} [options.side] side to place the panel (combination of right/left and bottom/top)
+     * @return {HTMLElement}
+     */
+    static findParent(side)
+    {
+        const styles = []
+        let name = 'yy-counter-'
+        if (side.indexOf('left') !== -1)
+        {
+            name += 'left-'
+            styles['left'] = 0
+        }
+        else
+        {
+            name += 'right-'
+            styles['right'] = 0
+        }
+        if (side.indexOf('top') !== -1)
+        {
+            name += 'top'
+            styles['top'] = 0
+        }
+        else
+        {
+            name += 'bottom'
+            styles['bottom'] = 0
+        }
+        const test = document.getElementById(name)
+        if (test)
+        {
+            return test
+        }
+        const container = document.createElement('div')
+        container.id = name
+        container.style.overflow = 'hidden'
+        container.style.position = 'fixed'
+        container.style.zIndex = 10000
+        for (let style in styles)
+        {
+            container.style[style] = styles[style]
+        }
+        document.body.appendChild(container)
+        return container
+    }
+
+    /**
+     * replaces the innerHTML of the console
+     * @param {string|number} text1
+     * @param {string|number} [text2]
+     * @param {string|number} [...textn] any number of arguments
+     */
+    log()
+    {
+        let s = ''
+        for (let arg of arguments)
+        {
+            s += '<div>' + arg + '</div>'
+        }
+        this.div.innerHTML =  s
+    }
+
+    /**
+     * appends to the innerHTML of the console
+     * @param {string|number} text1
+     * @param {string|number} [text2]
+     * @param {string|number} [...textn] any number of arguments
+     */
+    append()
+    {
+        let s = this.div.innerHTML
+        for (let arg of arguments)
+        {
+            s += '<div>' + arg + '</div>'
+        }
+        this.div.innerHTML = s
+    }
+}
+},{}],387:[function(require,module,exports){
 const Color = require('tinycolor2')
+const Counter = require('yy-counter')
 
 const STYLES = {
-    'position': 'fixed',
     'background': 'rgba(0, 0, 0, 0.5)',
     'color': 'white',
-    'zIndex': 1001
 }
 
 const STYLES_FPS = {
@@ -59887,7 +60002,6 @@ module.exports = class FPS
      * @param {number} [options.meterWidth=100] width of meter div
      * @param {number} [options.meterHeight=25] height of meter div
      * @param {number} [options.meterLineHeight=4] height of meter line
-     * @param {HTMLElement} [options.parent=document.body]
      * @param {styles[]} [options.styles] CSS styles to apply to the div (in javascript format)
      * @param {styles[]} [options.stylesFPS] CSS styles to apply to the FPS text (in javascript format)
      * @param {styles[]} [options.stylesMeter] CSS styles to apply to the FPS meter (in javascript format)
@@ -59902,9 +60016,7 @@ module.exports = class FPS
         this.meterHeight = this.options.meterHeight || 25
         this.meterLineHeight = this.options.meterLineHeight || 4
         this.div = document.createElement('div')
-        this.parent = this.options.parent || document.body
-        this.parent.appendChild(this.div)
-        this.side(this.options)
+        Counter.findParent(this.options.side || 'bottom-right').appendChild(this.div)
         this.style(this.div, STYLES, this.options.styles)
         this.divFPS()
         this.meter = typeof this.options.meter === 'undefined' || this.options.meter
@@ -60082,9 +60194,9 @@ module.exports = class FPS
         }
     }
 }
-},{"tinycolor2":383}],387:[function(require,module,exports){
+},{"tinycolor2":383,"yy-counter":386}],388:[function(require,module,exports){
 module.exports = require('./src/loop')
-},{"./src/loop":389}],388:[function(require,module,exports){
+},{"./src/loop":390}],389:[function(require,module,exports){
 const Events = require('eventemitter3')
 
 /** Entry class for Loop */
@@ -60165,7 +60277,7 @@ class Entry extends Events
 }
 
 module.exports = Entry
-},{"eventemitter3":5}],389:[function(require,module,exports){
+},{"eventemitter3":5}],390:[function(require,module,exports){
 /* Copyright (c) 2017 YOPEY YOPEY LLC */
 
 const Events = require('eventemitter3')
@@ -60364,7 +60476,7 @@ const Entry = require('./entry')
 
 Loop.entry = Entry
 module.exports = Loop
-},{"./entry":388,"eventemitter3":5}],390:[function(require,module,exports){
+},{"./entry":389,"eventemitter3":5}],391:[function(require,module,exports){
 // yy-random
 // by David Figatner
 // MIT license
@@ -60790,7 +60902,7 @@ class Random
 }
 
 module.exports = new Random()
-},{"seedrandom":375}],391:[function(require,module,exports){
+},{"seedrandom":375}],392:[function(require,module,exports){
 // yy-renderer
 // by David Figatner
 // (c) YOPEY YOPEY LLC 2017
@@ -61178,9 +61290,9 @@ class Renderer extends Loop
 }
 
 module.exports = Renderer
-},{"exists":6,"pixi.js":334,"yy-fps":386,"yy-loop":387}],392:[function(require,module,exports){
+},{"exists":6,"pixi.js":334,"yy-fps":387,"yy-loop":388}],393:[function(require,module,exports){
 
-},{}],393:[function(require,module,exports){
+},{}],394:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -61408,7 +61520,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":394}],394:[function(require,module,exports){
+},{"_process":395}],395:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -61594,7 +61706,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],395:[function(require,module,exports){
+},{}],396:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -62131,7 +62243,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],396:[function(require,module,exports){
+},{}],397:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -62217,7 +62329,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],397:[function(require,module,exports){
+},{}],398:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -62304,13 +62416,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],398:[function(require,module,exports){
+},{}],399:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":396,"./encode":397}],399:[function(require,module,exports){
+},{"./decode":397,"./encode":398}],400:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -63044,7 +63156,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":400,"punycode":395,"querystring":398}],400:[function(require,module,exports){
+},{"./util":401,"punycode":396,"querystring":399}],401:[function(require,module,exports){
 'use strict';
 
 module.exports = {

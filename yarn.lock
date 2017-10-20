@@ -46,9 +46,9 @@ penner@^0.1.3:
   version "0.1.3"
   resolved "https://registry.yarnpkg.com/penner/-/penner-0.1.3.tgz#0b8b482d4e9b39af2f3d7c37592229b8acc29705"
 
-pixi-ease@^0.13.2:
-  version "0.13.2"
-  resolved "https://registry.yarnpkg.com/pixi-ease/-/pixi-ease-0.13.2.tgz#481108dd5e9a735930696ae2ccfc1b02d9ec5b16"
+pixi-ease@^0.13.3:
+  version "0.13.3"
+  resolved "https://registry.yarnpkg.com/pixi-ease/-/pixi-ease-0.13.3.tgz#2baf4300563e63f5399b970c8d95ef41d9da802a"
   dependencies:
     eventemitter3 "^2.0.3"
     penner "^0.1.3"
@@ -102,11 +102,16 @@ yy-color@^1.0.0:
   dependencies:
     yy-random "^1.0.1"
 
-yy-fps@^0.3.2:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/yy-fps/-/yy-fps-0.3.2.tgz#e18b2a74149416bd0732836273d11a192fe0318d"
+yy-counter@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/yy-counter/-/yy-counter-2.0.1.tgz#35385c5e65b35abb0f99e797b616299a395a8800"
+
+yy-fps@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/yy-fps/-/yy-fps-0.4.1.tgz#de618a793a2001c723682b1300dd6effe975e507"
   dependencies:
     tinycolor2 "^1.4.1"
+    yy-counter "^2.0.1"
 
 yy-loop@^0.3.1, yy-loop@^0.3.5:
   version "0.3.5"
