@@ -1,5 +1,5 @@
 ## renderer.js
-wrapper for pixi.js with automatic loop & clean/dirty settings 
+wrapper for pixi.js renderer with automatic loop & clean/dirty settings 
 
 ## simple example
 ```
