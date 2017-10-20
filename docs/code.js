@@ -11,7 +11,7 @@ let count = 100
 function test()
 {
     // creates the renderer, updating every frame
-    renderer = new Renderer({ debug: true, styles: { pointerEvents: 'none' }, FPS: 60 })
+    renderer = new Renderer({ debug: true, styles: { pointerEvents: 'none' }, FPS: 60})
 
     // set initial position for all triangles
     for (let i = 0; i < count; i++)

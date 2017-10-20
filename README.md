@@ -32,7 +32,6 @@ https://davidfig.github.io/renderer/
     /**
      * Wrapper for a pixi.js Renderer
      * @param {object} [options]
-     * @param {boolean|string} [options.debug] turns on FPS, dirty, and count indicators
      * @param {boolean} [options.alwaysRender=false] update renderer every update tick
      * @param {number} [options.FPS=60] desired FPS for rendering (otherwise render on every tick)
      *
@@ -51,6 +50,9 @@ https://davidfig.github.io/renderer/
      * @param {boolean} [options.clearBeforeRender=true] sets if the CanvasRenderer will clear the canvas or before the render pass. If you wish to set this to false, you *must* set preserveDrawingBuffer to `true`.
      * @param {boolean} [options.preserveDrawingBuffer=false] enables drawing buffer preservation, enable this if you need to call toDataUrl on the webgl context.
      * @param {boolean} [options.roundPixels=false] if true PIXI will Math.floor() x/y values when rendering, stopping pixel interpolation
+     *
+     * @param {boolean|string} [options.debug] false, true, or some combination of 'fps', 'dirty', and 'count' (e.g., 'count-dirty' or 'dirty')
+     * @param {object} [options.fpsOptions] options from yy-fps (https://github.com/davidfig/fps)
      *
      ** from yy-loop:
      * @param {number} [options.maxFrameTime=1000/60] maximum time in milliseconds for a frame

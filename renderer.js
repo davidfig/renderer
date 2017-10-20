@@ -14,7 +14,6 @@ class Renderer extends Loop
     /**
      * Wrapper for a pixi.js Renderer
      * @param {object} [options]
-     * @param {boolean|string} [options.debug] turns on FPS, dirty, and count indicators
      * @param {boolean} [options.alwaysRender=false] update renderer every update tick
      * @param {number} [options.FPS=60] desired FPS for rendering (otherwise render on every tick)
      *
@@ -33,6 +32,9 @@ class Renderer extends Loop
      * @param {boolean} [options.clearBeforeRender=true] sets if the CanvasRenderer will clear the canvas or before the render pass. If you wish to set this to false, you *must* set preserveDrawingBuffer to `true`.
      * @param {boolean} [options.preserveDrawingBuffer=false] enables drawing buffer preservation, enable this if you need to call toDataUrl on the webgl context.
      * @param {boolean} [options.roundPixels=false] if true PIXI will Math.floor() x/y values when rendering, stopping pixel interpolation
+     *
+     * @param {boolean|string} [options.debug] false, true, or some combination of 'fps', 'dirty', and 'count' (e.g., 'count-dirty' or 'dirty')
+     * @param {object} [options.fpsOptions] options from yy-fps (https://github.com/davidfig/fps)
      *
      ** from yy-loop:
      * @param {number} [options.maxFrameTime=1000/60] maximum time in milliseconds for a frame
@@ -116,16 +118,25 @@ class Renderer extends Loop
      */
     createDebug(options)
     {
-        this.fps = new FPS({ FPS: options.FPS })
+        this.debug = options.debug
+        const fpsOptions = options.fpsOptions || {}
+        fpsOptions.FPS = options.FPS
+        this.fps = new FPS(fpsOptions)
         const indicator = document.createElement('div')
         indicator.style.display = 'flex'
         indicator.style.justifyContent = 'space-between'
         this.fps.div.prepend(indicator)
-        this.dirtyIndicator = document.createElement('div')
-        indicator.appendChild(this.dirtyIndicator)
-        this.dirtyIndicator.innerHTML = '&#9624; '
-        this.countIndicator = document.createElement('div')
-        indicator.appendChild(this.countIndicator)
+        if (options.debug === true || options.debug === 1 || options.debug.toLowerCase().indexOf('dirty') !== -1)
+        {
+            this.dirtyIndicator = document.createElement('div')
+            indicator.appendChild(this.dirtyIndicator)
+            this.dirtyIndicator.innerHTML = '&#9624; '
+        }
+        if (options.debug === true || options.debug === 1 || options.debug.toLowerCase().indexOf('count') !== -1)
+        {
+            this.countIndicator = document.createElement('div')
+            indicator.appendChild(this.countIndicator)
+        }
     }
 
     debugUpdate()
@@ -151,16 +162,19 @@ class Renderer extends Loop
         if (this.fps)
         {
             this.fps.frame()
-            if (this.lastDirty !== this.dirty)
+            if (this.dirtyIndicator && this.lastDirty !== this.dirty)
             {
                 this.dirtyIndicator.style.color = this.dirty ? 'white' : 'black'
                 this.lastDirty = this.dirty
             }
-            const count = this.countObjects()
-            if (this.lastCount !== count)
+            if (this.countIndicator)
             {
-                this.countIndicator.innerText = count
-                this.lastCount = count
+                const count = this.countObjects()
+                if (this.lastCount !== count)
+                {
+                    this.countIndicator.innerText = count
+                    this.lastCount = count
+                }
             }
         }
         if (this.dirty)
