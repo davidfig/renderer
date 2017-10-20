@@ -7,40 +7,49 @@ const Renderer = require('..')
 
 let renderer, eases
 
-const COUNT = 100
+let count = 100
 
 function test()
 {
     // creates the renderer, updating every frame
-    renderer = new Renderer({ debug: true, alwaysRender: true, styles: { pointerEvents: 'none' }, FPS: 60 })
+    renderer = new Renderer({ debug: true, styles: { pointerEvents: 'none' }, FPS: 60 })
 
     // set initial position for all triangles
-    for (let i = 0; i < COUNT; i++)
+    for (let i = 0; i < count; i++)
     {
         const t = triangle(Random.get(renderer.width * 0.1, true), Random.color())
         t.position.set(Random.get(renderer.width), Random.get(renderer.height))
-        next(t)
     }
+
+    next()
 
     // easing list updates each tick
     renderer.interval(eases.update.bind(eases))
+
+    // restart triangles every 6 seconds
+    renderer.interval(next, 6000)
 
     // start the renderer loop
     renderer.start()
 }
 
 // animate one triangle with random values
-function next(t)
+function next()
 {
-    const x = Random.get(renderer.width)
-    const y = Random.get(renderer.height)
-    const scale = Random.get(3, true)
-    const alpha = Random.get(0.5, true)
-    const rotation = Random.angle()
-    const time = Random.range(1000, 4000)
-    const ease = eases.to(t, { alpha, x, y, scale, rotation }, time, { ease: 'easeInOutSine' })
-    ease.on('done', next)
+    for (let t of renderer.stage.children)
+    {
+        // randomly make some triangles invisible to test count
+        t.visible = Random.chance(0.9)
 
+        const x = Random.get(renderer.width)
+        const y = Random.get(renderer.height)
+        const scale = Random.get(3, true)
+        const alpha = Random.get(0.5, true)
+        const rotation = Random.angle()
+        const time = Random.range(1000, 4000)
+        const ease = eases.to(t, { alpha, x, y, scale, rotation }, time, { ease: 'easeInOutSine' })
+        ease.on('each', () => renderer.dirty = true)
+    }
 }
 
 // create the triangles
@@ -60798,7 +60807,7 @@ class Renderer extends Loop
     /**
      * Wrapper for a pixi.js Renderer
      * @param {object} [options]
-     * @param {boolean|string} [options.debug] turns on FPS indicator
+     * @param {boolean|string} [options.debug] turns on FPS, dirty, and count indicators
      * @param {boolean} [options.alwaysRender=false] update renderer every update tick
      * @param {number} [options.FPS=60] desired FPS for rendering (otherwise render on every tick)
      *
@@ -60858,7 +60867,7 @@ class Renderer extends Loop
             }
         }
 
-        if (options.debug) this.fps = new FPS({ FPS: options.FPS })
+        if (options.debug) this.createDebug(options)
         if (this.autoResize) window.addEventListener('resize', this.resize.bind(this))
         this.time = 0
         this.stage = new PIXI.Container()
@@ -60895,6 +60904,29 @@ class Renderer extends Loop
     }
 
     /**
+     * create FPS meter and render indicator
+     * @param {object} options
+     */
+    createDebug(options)
+    {
+        this.fps = new FPS({ FPS: options.FPS })
+        const indicator = document.createElement('div')
+        indicator.style.display = 'flex'
+        indicator.style.justifyContent = 'space-between'
+        this.fps.div.prepend(indicator)
+        this.dirtyIndicator = document.createElement('div')
+        indicator.appendChild(this.dirtyIndicator)
+        this.dirtyIndicator.innerHTML = '&#9624; '
+        this.countIndicator = document.createElement('div')
+        indicator.appendChild(this.countIndicator)
+    }
+
+    debugUpdate()
+    {
+        this.dirtyIndicator.color = this.dirty
+    }
+
+    /**
      * immediately render without checking dirty flag
      */
     render()
@@ -60912,6 +60944,17 @@ class Renderer extends Loop
         if (this.fps)
         {
             this.fps.frame()
+            if (this.lastDirty !== this.dirty)
+            {
+                this.dirtyIndicator.style.color = this.dirty ? 'white' : 'black'
+                this.lastDirty = this.dirty
+            }
+            const count = this.countObjects()
+            if (this.lastCount !== count)
+            {
+                this.countIndicator.innerText = count
+                this.lastCount = count
+            }
         }
         if (this.dirty)
         {

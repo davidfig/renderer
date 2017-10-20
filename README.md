@@ -32,7 +32,7 @@ https://davidfig.github.io/renderer/
     /**
      * Wrapper for a pixi.js Renderer
      * @param {object} [options]
-     * @param {boolean|string} [options.debug] turns on FPS indicator
+     * @param {boolean|string} [options.debug] turns on FPS, dirty, and count indicators
      * @param {boolean} [options.alwaysRender=false] update renderer every update tick
      * @param {number} [options.FPS=60] desired FPS for rendering (otherwise render on every tick)
      *
@@ -61,6 +61,12 @@ https://davidfig.github.io/renderer/
      * @event stop(Loop)
      */
     constructor(options)
+
+    /**
+     * create FPS meter and render indicator
+     * @param {object} options
+     */
+    createDebug(options)
 
     /**
      * immediately render without checking dirty flag
