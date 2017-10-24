@@ -1,6 +1,6 @@
 {
   "name": "yy-renderer",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "wrapper for PIXI.Renderer class ",
   "main": "renderer.js",
   "scripts": {
@@ -29,7 +29,7 @@
   "dependencies": {
     "exists": "^1.0.1",
     "pixi.js": "^4.5.6",
-    "yy-fps": "^0.5.0",
+    "yy-fps": "^0.5.2",
     "yy-loop": "^0.3.5"
   }
 }
