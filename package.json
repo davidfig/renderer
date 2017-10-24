@@ -7,7 +7,7 @@
     "test": "budo docs/code.js:index.js --dir docs --live",
     "docs": "markdown-api README.md renderer.js",
     "build": "browserify docs/code.js > docs/index.js",
-    "prepare": "yarn docs && yarn build"
+    "prepublishOnly": "yarn docs && yarn build"
   },
   "repository": {
     "type": "git",
