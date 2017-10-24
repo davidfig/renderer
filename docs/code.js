@@ -1,6 +1,7 @@
 const Random = require('yy-random')
 const PIXI = require('pixi.js')
 const Ease = require('pixi-ease')
+const easyedit = require('easyedit')
 
 const Renderer = require('..')
 
@@ -66,9 +67,40 @@ function triangle(size, color)
     return g
 }
 
+function FPS()
+{
+    const fps = document.createElement('div')
+    document.body.appendChild(fps)
+    fps.style.borderRadius = '5%'
+    fps.style.position = 'fixed'
+    fps.style.left = '1em'
+    fps.style.top = '50%'
+    fps.style.transform = 'translate(0, -60%)'
+    fps.style.background = 'rgba(0, 100, 0, 0.5)'
+    fps.style.color = 'white'
+    fps.style.padding = '0.2em 0.5em'
+    fps.style.fontSize = '2em'
+    fps.style.textAlign = 'center'
+    const edit = document.createElement('span')
+    fps.appendChild(edit)
+    edit.style.borderBottom = '1px dashed white'
+    edit.innerText = '60'
+    edit.style.cursor = 'cursor'
+    const title = document.createElement('span')
+    fps.appendChild(title)
+    title.innerText = ' FPS'
+    title.style.cursor = 'default'
+    new easyedit(edit, { onsuccess:
+        function (value)
+        {
+            renderer.fps = parseInt(value)
+        }})
+}
+
 window.onload = function ()
 {
     eases = new Ease.list()
     test()
+    FPS()
     require('./highlight')('https://github.com/davidfig/renderer')
 }

@@ -82,7 +82,7 @@ class Renderer extends Loop
         this.stage = new PIXI.Container()
         this.dirty = this.alwaysRender = options.alwaysRender || false
         this.resize(true)
-        this.interval(this.updateRenderer.bind(this), this.FPS)
+        this.updateRendererID = this.interval(this.updateRenderer.bind(this), this.FPS)
     }
 
     /**
@@ -121,11 +121,11 @@ class Renderer extends Loop
         this.debug = options.debug
         const fpsOptions = options.fpsOptions || {}
         fpsOptions.FPS = options.FPS
-        this.fps = new FPS(fpsOptions)
+        this.fpsMeter = new FPS(fpsOptions)
         const indicator = document.createElement('div')
         indicator.style.display = 'flex'
         indicator.style.justifyContent = 'space-between'
-        this.fps.div.prepend(indicator)
+        this.fpsMeter.div.prepend(indicator)
         if (options.debug === true || options.debug === 1 || options.debug.toLowerCase().indexOf('dirty') !== -1)
         {
             this.dirtyIndicator = document.createElement('div')
@@ -159,9 +159,9 @@ class Renderer extends Loop
      */
     updateRenderer()
     {
-        if (this.fps)
+        if (this.fpsMeter)
         {
-            this.fps.frame()
+            this.fpsMeter.frame()
             if (this.dirtyIndicator && this.lastDirty !== this.dirty)
             {
                 this.dirtyIndicator.style.color = this.dirty ? 'white' : 'black'
@@ -315,6 +315,25 @@ class Renderer extends Loop
     {
         return (this.landscape ? this.width : this.height)
     }
+
+    /**
+     * getter/setter to change desired FPS of renderer
+     */
+    get fps()
+    {
+        return this.FPS
+    }
+    set fps(value)
+    {
+        this.FPS = 1000 / value
+        this.removeInterval(this.updateRendererID)
+        this.updateRendererID = this.interval(this.updateRenderer.bind(this), this.FPS)
+        if (this.fpsMeter)
+        {
+            this.fpsMeter.fps = value
+        }
+    }
+
 
     /**
      * start the internal loop

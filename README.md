@@ -136,6 +136,11 @@ https://davidfig.github.io/renderer/
     dimensionBig()
 
     /**
+     * getter/setter to change desired FPS of renderer
+     */
+    get fps()
+
+    /**
      * start the internal loop
      * @inherited from yy-loop
      * @returns {Renderer} this
