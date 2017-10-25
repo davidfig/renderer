@@ -110,7 +110,7 @@ https://davidfig.github.io/renderer/
      * remove child from stage
      * @param {PIXI.DisplayObject} object
      */
-    remove(object)
+    removeChild(object)
 
     /**
      * clears the stage
@@ -184,7 +184,7 @@ https://davidfig.github.io/renderer/
      * @inherited from yy-loop
      * @param {object} entry - returned by add()
      */
-    removeInterval()
+    // remove(entry)
 
     /**
      * @inherited from yy-loop

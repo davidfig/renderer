@@ -254,7 +254,7 @@ class Renderer extends Loop
      * remove child from stage
      * @param {PIXI.DisplayObject} object
      */
-    remove(object)
+    removeChild(object)
     {
         this.stage.removeChild(object)
     }
@@ -379,10 +379,7 @@ class Renderer extends Loop
      * @inherited from yy-loop
      * @param {object} entry - returned by add()
      */
-    removeInterval()
-    {
-        super.remove(...arguments)
-    }
+    // remove(entry)
 
     /**
      * @inherited from yy-loop
