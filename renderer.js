@@ -66,7 +66,7 @@ class Renderer extends Loop
         this.renderer = new Renderer(options)
         if (options.color)
         {
-            this.renderer.backgroundColor = options.color
+            this.canvas.style.backgroundColor = options.color
         }
         if (options.styles)
         {

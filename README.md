@@ -28,7 +28,7 @@ https://davidfig.github.io/renderer/
     npm i yy-renderer
 
 ## API Reference
-```
+```js
     /**
      * Wrapper for a pixi.js Renderer
      * @param {object} [options]
