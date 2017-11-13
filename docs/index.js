@@ -61396,8 +61396,8 @@ class Renderer extends Loop
     createCanvas(options)
     {
         this.canvas = document.createElement('canvas')
-        this.canvas.style.width = '100%'
-        this.canvas.style.height = '100%'
+        this.canvas.style.width = '100vw'
+        this.canvas.style.height = '100vh'
         if (options.parent)
         {
             options.parent.appendChild(this.canvas)
