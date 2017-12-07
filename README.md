@@ -203,6 +203,7 @@ https://davidfig.github.io/renderer/
      * @type {number} count of running animations
      */
     // get countRunning()
+
 ```
 ## license  
 MIT License  
