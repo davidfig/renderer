@@ -29,7 +29,7 @@
   "dependencies": {
     "exists": "^1.0.1",
     "pixi.js": "^4.6.2",
-    "yy-fps": "^0.5.2",
+    "yy-fps": "^0.5.3",
     "yy-loop": "^0.3.5"
   }
 }
