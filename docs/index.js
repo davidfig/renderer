@@ -13,7 +13,7 @@ let count = 100
 function test()
 {
     // creates the renderer, updating every frame
-    renderer = new Renderer({ debug: true, styles: { pointerEvents: 'none' }, FPS: 60, pauseOnBlur: true})
+    renderer = new Renderer({ debug: true, turnOffTicker: true, turnOffInteraction: true, styles: { pointerEvents: 'none' }, FPS: 60, pauseOnBlur: true})
 
     // set initial position for all triangles
     for (let i = 0; i < count; i++)
@@ -105,7 +105,7 @@ window.onload = function ()
     FPS()
     require('./highlight')('https://github.com/davidfig/renderer')
 }
-},{"..":399,"./highlight":2,"easyedit":6,"pixi-ease":193,"pixi.js":341,"yy-random":398}],2:[function(require,module,exports){
+},{"..":400,"./highlight":2,"easyedit":6,"pixi-ease":193,"pixi.js":341,"yy-random":399}],2:[function(require,module,exports){
 const forkMe = require('fork-me-github')
 
 module.exports = function highlight(url)
@@ -34087,7 +34087,7 @@ var SpriteMaskFilter = function (_Filter) {
 
 exports.default = SpriteMaskFilter;
 
-},{"../../../../math":256,"../../../../textures/TextureMatrix":302,"../Filter":272,"path":401}],276:[function(require,module,exports){
+},{"../../../../math":256,"../../../../textures/TextureMatrix":302,"../Filter":272,"path":402}],276:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -37786,7 +37786,7 @@ function generateSampleSrc(maxTextures) {
     return src;
 }
 
-},{"../../Shader":230,"path":401}],294:[function(require,module,exports){
+},{"../../Shader":230,"path":402}],294:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -43104,7 +43104,7 @@ function determineCrossOrigin(url) {
     return '';
 }
 
-},{"url":407}],311:[function(require,module,exports){
+},{"url":408}],311:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47550,7 +47550,7 @@ exports.default = TilingSpriteRenderer;
 
 core.WebGLRenderer.registerPlugin('tilingSprite', TilingSpriteRenderer);
 
-},{"../../core":251,"../../core/const":232,"path":401}],329:[function(require,module,exports){
+},{"../../core":251,"../../core/const":232,"path":402}],329:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47634,7 +47634,7 @@ var AlphaFilter = function (_core$Filter) {
 
 exports.default = AlphaFilter;
 
-},{"../../core":251,"path":401}],330:[function(require,module,exports){
+},{"../../core":251,"path":402}],330:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -48797,7 +48797,7 @@ var ColorMatrixFilter = function (_core$Filter) {
 exports.default = ColorMatrixFilter;
 ColorMatrixFilter.prototype.grayscale = ColorMatrixFilter.prototype.greyscale;
 
-},{"../../core":251,"path":401}],337:[function(require,module,exports){
+},{"../../core":251,"path":402}],337:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -48907,7 +48907,7 @@ var DisplacementFilter = function (_core$Filter) {
 
 exports.default = DisplacementFilter;
 
-},{"../../core":251,"path":401}],338:[function(require,module,exports){
+},{"../../core":251,"path":402}],338:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -48961,7 +48961,7 @@ var FXAAFilter = function (_core$Filter) {
 
 exports.default = FXAAFilter;
 
-},{"../../core":251,"path":401}],339:[function(require,module,exports){
+},{"../../core":251,"path":402}],339:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -49137,7 +49137,7 @@ var NoiseFilter = function (_core$Filter) {
 
 exports.default = NoiseFilter;
 
-},{"../../core":251,"path":401}],341:[function(require,module,exports){
+},{"../../core":251,"path":402}],341:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -51756,7 +51756,7 @@ function parse(resource, texture) {
     resource.bitmapFont = _extras.BitmapText.registerFont(resource.data, texture);
 }
 
-},{"../core":251,"../extras":327,"path":401,"resource-loader":380}],349:[function(require,module,exports){
+},{"../core":251,"../extras":327,"path":402,"resource-loader":380}],349:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -52114,7 +52114,7 @@ function getResourcePath(resource, baseUrl) {
     return _url2.default.resolve(resource.url.replace(baseUrl, ''), resource.data.meta.image);
 }
 
-},{"../core":251,"resource-loader":380,"url":407}],352:[function(require,module,exports){
+},{"../core":251,"resource-loader":380,"url":408}],352:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -53764,7 +53764,7 @@ exports.default = MeshRenderer;
 
 core.WebGLRenderer.registerPlugin('mesh', MeshRenderer);
 
-},{"../../core":251,"../Mesh":353,"path":401,"pixi-gl-core":215}],360:[function(require,module,exports){
+},{"../../core":251,"../Mesh":353,"path":402,"pixi-gl-core":215}],360:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -59110,7 +59110,7 @@ if ((typeof module) == 'object' && module.exports) {
   Math    // math: package containing random, pow, and seedrandom
 );
 
-},{"crypto":400}],390:[function(require,module,exports){
+},{"crypto":401}],390:[function(require,module,exports){
 // TinyColor v1.4.1
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
@@ -60892,7 +60892,7 @@ class Color
 };
 
 module.exports = new Color();
-},{"yy-random":398}],393:[function(require,module,exports){
+},{"yy-random":399}],393:[function(require,module,exports){
 // yy-counter
 // In-browser counter to watch changeable values like counters or FPS
 // David Figatner
@@ -61244,11 +61244,205 @@ module.exports = class FPS
 }
 },{"tinycolor2":390,"yy-counter":393}],395:[function(require,module,exports){
 arguments[4][195][0].apply(exports,arguments)
-},{"./src/loop":397,"dup":195}],396:[function(require,module,exports){
+},{"./src/loop":398,"dup":195}],396:[function(require,module,exports){
+arguments[4][194][0].apply(exports,arguments)
+},{"dup":194}],397:[function(require,module,exports){
 arguments[4][197][0].apply(exports,arguments)
-},{"dup":197,"eventemitter3":7}],397:[function(require,module,exports){
-arguments[4][198][0].apply(exports,arguments)
-},{"./entry":396,"dup":198,"eventemitter3":7}],398:[function(require,module,exports){
+},{"dup":197,"eventemitter3":396}],398:[function(require,module,exports){
+/* Copyright (c) 2017 YOPEY YOPEY LLC */
+
+const Events = require('eventemitter3')
+
+class Loop extends Events
+{
+    /**
+     * basic loop support
+     * @param {object} [options]
+     * @param {number} [options.maxFrameTime=1000/60] maximum time in milliseconds for a frame
+     * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
+     *
+     * @event each(elapsed, Loop)
+     * @event start(Loop)
+     * @event stop(Loop)
+     */
+    constructor(options)
+    {
+        super()
+        options = options || {}
+        this.maxFrameTime = options.maxFrameTime || 1000 / 60
+        if (options.pauseOnBlur)
+        {
+            window.addEventListener('blur', () => this.stopBlur())
+            window.addEventListener('focus', () => this.startBlur())
+        }
+        this.list = []
+    }
+
+    /**
+     * start requestAnimationFrame() loop
+     * @return {Loop} this
+     */
+    start()
+    {
+        if (!this.running)
+        {
+            this.running = true
+            this.loop(0)
+            this.emit('start', this)
+        }
+        return this
+    }
+
+    /**
+     * handler for focus event
+     * @private
+     */
+    startBlur()
+    {
+        if (this.blurred)
+        {
+            this.start()
+            this.blurred = false
+        }
+    }
+
+    /**
+     * handler for blur event
+     * @private
+     */
+    stopBlur()
+    {
+        if (this.running)
+        {
+            this.stop()
+            this.blurred = true
+        }
+    }
+
+    /**
+     * stop loop
+     * @return {Loop} this
+     */
+    stop()
+    {
+        if (this.handle)
+        {
+            window.cancelAnimationFrame(this.handle)
+            this.handle = null
+        }
+        this.running = false
+        this.blurred = false
+        this.emit('stop', this)
+        return this
+    }
+
+    /**
+     * loop through updates; can be called manually each frame, or called automatically as part of start()
+     * @param {number} elapsed time since last call (will be clamped to this.maxFrameTime)
+     */
+    update(elapsed)
+    {
+        const maxFrameTime = this.maxFrameTime
+        elapsed = elapsed > maxFrameTime ? maxFrameTime : elapsed
+        for (let entry of this.list)
+        {
+            if (entry.update(elapsed))
+            {
+                this.remove(entry)
+            }
+        }
+        this.emit('each', elapsed, this)
+    }
+
+    /**
+     * internal loop through animations
+     * @private
+     */
+    loop(elapsed)
+    {
+        if (this.running)
+        {
+            this.update(elapsed)
+            this.handle = requestAnimationFrame((elapsed) => this.loop(elapsed))
+        }
+    }
+
+    /**
+     * adds a callback to the loop
+     * @param {function} callback
+     * @param {number} [time=0] in milliseconds to call this update (0=every frame)
+     * @param {number} [count=0] number of times to run this update (0=infinite)
+     * @return {object} entry - used to remove or change the parameters of the update
+     */
+    interval(callback, time, count)
+    {
+        const entry = new Entry(callback, time, count)
+        this.list.push(entry)
+        return entry
+    }
+
+    /**
+     * adds a one-time callback to the loop
+     * @param {function} callback
+     * @param {number} time in milliseconds to call this update
+     * @return {object} entry - used to remove or change the parameters of the update
+     */
+    timeout(callback, time)
+    {
+        return this.interval(callback, time, 1)
+    }
+
+    /**
+     * remove a callback from the loop
+     * @param {object} entry - returned by add()
+     */
+    remove(entry)
+    {
+        const index = this.list.indexOf(entry)
+        if (index !== -1)
+        {
+            this.list.splice(index, 1)
+        }
+    }
+
+    /**
+     * removes all callbacks from the loop
+     */
+    removeAll()
+    {
+        this.list = []
+    }
+
+    /**
+     * @type {number} count of all animations
+     */
+    get count()
+    {
+        return this.list.length
+    }
+
+    /**
+     * @type {number} count of running animations
+     */
+    get countRunning()
+    {
+        let count = 0
+        for (let entry of this.list)
+        {
+            if (!entry.pause)
+            {
+                count++
+            }
+        }
+        return count
+    }
+}
+
+const Entry = require('./entry')
+
+Loop.entry = Entry
+module.exports = Loop
+},{"./entry":397,"eventemitter3":396}],399:[function(require,module,exports){
 // yy-random
 // by David Figatner
 // MIT license
@@ -61674,7 +61868,7 @@ class Random
 }
 
 module.exports = new Random()
-},{"seedrandom":382}],399:[function(require,module,exports){
+},{"seedrandom":382}],400:[function(require,module,exports){
 // yy-renderer
 // by David Figatner
 // (c) YOPEY YOPEY LLC 2017
@@ -61701,6 +61895,9 @@ class Renderer extends Loop
      * @param {number} [options.aspectRatio] resizing will maintain aspect ratio by ensuring that the smaller dimension fits
      * @param {boolean} [options.autoresize=false] automatically calls resize during resize events
      * @param {number} [options.color=0xffffff] background color in hex
+     *
+     * @param {boolean} [options.turnOffTicker] turn off PIXI.shared.ticker
+     * @param {boolean} [options.turnOffInteraction] turn off PIXI.Interaction manager (saves cycles)
      *
      * @param {boolean} [options.noWebGL=false] use the PIXI.CanvasRenderer instead of PIXI.WebGLRenderer
      * @param {boolean} [options.antialias=true] turn on antialias if native antialias is not used, uses FXAA
@@ -61735,12 +61932,23 @@ class Renderer extends Loop
         if (!this.canvas) this.createCanvas(options)
         options.view = this.canvas
 
+        if (options.turnoffTicker)
+        {
+            const ticker = PIXI.ticker.shared
+            ticker.autoStart = false
+            ticker.stop()
+        }
+
         const noWebGL = options.noWebGL || false
         options.noWebGL = null
         options.autoresize = null
         const Renderer = noWebGL ? PIXI.CanvasRenderer : PIXI.WebGLRenderer
 
         this.renderer = new Renderer(options)
+        if (options.turnOffInteraction)
+        {
+            this.renderer.plugins.interaction.destroy()
+        }
         if (options.color)
         {
             this.canvas.style.backgroundColor = options.color
@@ -62078,9 +62286,9 @@ class Renderer extends Loop
 }
 
 module.exports = Renderer
-},{"exists":8,"pixi.js":341,"yy-fps":394,"yy-loop":395}],400:[function(require,module,exports){
+},{"exists":8,"pixi.js":341,"yy-fps":394,"yy-loop":395}],401:[function(require,module,exports){
 
-},{}],401:[function(require,module,exports){
+},{}],402:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -62308,7 +62516,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":402}],402:[function(require,module,exports){
+},{"_process":403}],403:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -62494,7 +62702,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],403:[function(require,module,exports){
+},{}],404:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -63031,7 +63239,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],404:[function(require,module,exports){
+},{}],405:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -63117,7 +63325,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],405:[function(require,module,exports){
+},{}],406:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -63204,13 +63412,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],406:[function(require,module,exports){
+},{}],407:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":404,"./encode":405}],407:[function(require,module,exports){
+},{"./decode":405,"./encode":406}],408:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -63944,7 +64152,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":408,"punycode":403,"querystring":406}],408:[function(require,module,exports){
+},{"./util":409,"punycode":404,"querystring":407}],409:[function(require,module,exports){
 'use strict';
 
 module.exports = {

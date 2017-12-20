@@ -25,6 +25,9 @@ class Renderer extends Loop
      * @param {boolean} [options.autoresize=false] automatically calls resize during resize events
      * @param {number} [options.color=0xffffff] background color in hex
      *
+     * @param {boolean} [options.turnOffTicker] turn off PIXI.shared.ticker
+     * @param {boolean} [options.turnOffInteraction] turn off PIXI.Interaction manager (saves cycles)
+     *
      * @param {boolean} [options.noWebGL=false] use the PIXI.CanvasRenderer instead of PIXI.WebGLRenderer
      * @param {boolean} [options.antialias=true] turn on antialias if native antialias is not used, uses FXAA
      * @param {boolean} [options.forceFXAA=false] forces FXAA antialiasing to be used over native. FXAA is faster, but may not always look as great
@@ -58,12 +61,23 @@ class Renderer extends Loop
         if (!this.canvas) this.createCanvas(options)
         options.view = this.canvas
 
+        if (options.turnoffTicker)
+        {
+            const ticker = PIXI.ticker.shared
+            ticker.autoStart = false
+            ticker.stop()
+        }
+
         const noWebGL = options.noWebGL || false
         options.noWebGL = null
         options.autoresize = null
         const Renderer = noWebGL ? PIXI.CanvasRenderer : PIXI.WebGLRenderer
 
         this.renderer = new Renderer(options)
+        if (options.turnOffInteraction)
+        {
+            this.renderer.plugins.interaction.destroy()
+        }
         if (options.color)
         {
             this.canvas.style.backgroundColor = options.color
