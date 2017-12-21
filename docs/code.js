@@ -24,10 +24,10 @@ function test()
     next()
 
     // easing list updates each tick
-    renderer.interval(eases.update.bind(eases))
+    renderer.loop.add((elapsed) => eases.update(elapsed))
 
     // restart triangles every 6 seconds
-    renderer.interval(next, 6000)
+    renderer.loop.add(next, 6000)
 
     // start the renderer loop
     renderer.start()

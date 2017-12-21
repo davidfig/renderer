@@ -9,7 +9,7 @@ const FPS = require('yy-fps')
 const Loop = require('yy-loop')
 const exists = require('exists')
 
-class Renderer extends Loop
+class Renderer
 {
     /**
      * Wrapper for a pixi.js Renderer
@@ -39,7 +39,6 @@ class Renderer extends Loop
      * @param {boolean|string} [options.debug] false, true, or some combination of 'fps', 'dirty', and 'count' (e.g., 'count-dirty' or 'dirty')
      * @param {object} [options.fpsOptions] options from yy-fps (https://github.com/davidfig/fps)
      *
-     ** from yy-loop:
      * @param {number} [options.maxFrameTime=1000/60] maximum time in milliseconds for a frame
      * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
      *
@@ -50,7 +49,8 @@ class Renderer extends Loop
     constructor(options)
     {
         options = options || {}
-        super({ pauseOnBlur: options.pauseOnBlur, maxFrameTime: options.maxFrameTime })
+        this.options = options
+        this.loop = new Loop({ pauseOnBlur: options.pauseOnBlur, maxFrameTime: options.maxFrameTime })
         this.canvas = options.canvas
         this.autoResize = options.autoresize
         this.aspectRatio = options.aspectRatio
@@ -91,12 +91,11 @@ class Renderer extends Loop
         }
 
         if (options.debug) this.createDebug(options)
-        if (this.autoResize) window.addEventListener('resize', this.resize.bind(this))
+        if (this.autoResize) window.addEventListener('resize', () => this.resize())
         this.time = 0
         this.stage = new PIXI.Container()
         this.dirty = this.alwaysRender = options.alwaysRender || false
         this.resize(true)
-        this.updateRendererID = this.interval(this.updateRenderer.bind(this), this.FPS)
     }
 
     /**
@@ -168,10 +167,9 @@ class Renderer extends Loop
     }
 
     /**
-     * render the scene
      * @private
      */
-    updateRenderer()
+    update()
     {
         if (this.fpsMeter)
         {
@@ -210,7 +208,7 @@ class Renderer extends Loop
                 return
             }
             total++
-            for (var i = 0; i < object.children.length; i++)
+            for (let i = 0, _i = object.children.length; i < _i; i++)
             {
                 count(object.children[i])
             }
@@ -340,78 +338,62 @@ class Renderer extends Loop
     set fps(value)
     {
         this.FPS = 1000 / value
-        this.removeInterval(this.updateRendererID)
-        this.updateRendererID = this.interval(this.updateRenderer.bind(this), this.FPS)
+        if (this.loop)
+        {
+            this.loop.remove(this.loopSave)
+            this.loopSave = this.loop.add(() => this.update(), this.FPS)
+        }
         if (this.fpsMeter)
         {
             this.fpsMeter.fps = value
         }
     }
 
+    /**
+     * Add a listener for a given event to yy-loop
+     * @param {(String|Symbol)} event The event name.
+     * @param {Function} fn The listener function.
+     * @param {*} [context=this] The context to invoke the listener with.
+     * @returns {EventEmitter} `this`.
+     */
+    on()
+    {
+        this.loop.on(...arguments)
+    }
+
+    /**
+     * Add a one-time listener for a given event to yy-loop
+     * @param {(String|Symbol)} event The event name.
+     * @param {Function} fn The listener function.
+     * @param {*} [context=this] The context to invoke the listener with.
+     * @returns {EventEmitter} `this`.
+     * @public
+     */
+    once()
+    {
+        this.loop.once(...arguments)
+    }
 
     /**
      * start the internal loop
-     * @inherited from yy-loop
      * @returns {Renderer} this
      */
-    // start()
+    start()
+    {
+        this.loopSave = this.loop.add(() => this.update(), this.FPS)
+        this.loop.start()
+        return this
+    }
 
     /**
      * stop the internal loop
      * @inherited from yy-loop
      * @returns {Renderer} this
      */
-    // stop()
-
-    /**
-     * loop through updates; can be called manually each frame, or called automatically as part of start()
-     * @inherited from yy-loop
-     */
-    // update()
-
-    /**
-     * adds a callback to the loop
-     * @inherited from yy-loop
-     * @param {function} callback
-     * @param {number} [time=0] in milliseconds to call this update (0=every frame)
-     * @param {number} [count=0] number of times to run this update (0=infinite)
-     * @return {object} entry - used to remove or change the parameters of the update
-     */
-    // interval(callback, time, count)
-
-    /**
-     * adds a one-time callback to the loop
-     * @inherited from yy-loop
-     * @param {function} callback
-     * @param {number} time in milliseconds to call this update
-     * @return {object} entry - used to remove or change the parameters of the update
-     */
-    // timeout(callback, time)
-
-    /**
-     * remove a callback from the loop
-     * @inherited from yy-loop
-     * @param {object} entry - returned by add()
-     */
-    // remove(entry)
-
-    /**
-     * @inherited from yy-loop
-     * removes all callbacks from the loop
-     */
-    // removeAll()
-
-    /**
-     * @inherited from yy-loop
-     * @type {number} count of all animations
-     */
-    // get count()
-
-    /**
-     * @inherited from yy-loop
-     * @type {number} count of running animations
-     */
-    // get countRunning()
+    stop()
+    {
+        this.loop.stop()
+    }
 }
 
 module.exports = Renderer

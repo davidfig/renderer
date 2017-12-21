@@ -57,7 +57,6 @@ https://davidfig.github.io/renderer/
      * @param {boolean|string} [options.debug] false, true, or some combination of 'fps', 'dirty', and 'count' (e.g., 'count-dirty' or 'dirty')
      * @param {object} [options.fpsOptions] options from yy-fps (https://github.com/davidfig/fps)
      *
-     ** from yy-loop:
      * @param {number} [options.maxFrameTime=1000/60] maximum time in milliseconds for a frame
      * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
      *
@@ -144,68 +143,36 @@ https://davidfig.github.io/renderer/
     get fps()
 
     /**
+     * Add a listener for a given event to yy-loop
+     * @param {(String|Symbol)} event The event name.
+     * @param {Function} fn The listener function.
+     * @param {*} [context=this] The context to invoke the listener with.
+     * @returns {EventEmitter} `this`.
+     */
+    on()
+
+    /**
+     * Add a one-time listener for a given event to yy-loop
+     * @param {(String|Symbol)} event The event name.
+     * @param {Function} fn The listener function.
+     * @param {*} [context=this] The context to invoke the listener with.
+     * @returns {EventEmitter} `this`.
+     * @public
+     */
+    once()
+
+    /**
      * start the internal loop
-     * @inherited from yy-loop
      * @returns {Renderer} this
      */
-    // start()
+    start()
 
     /**
      * stop the internal loop
      * @inherited from yy-loop
      * @returns {Renderer} this
      */
-    // stop()
-
-    /**
-     * loop through updates; can be called manually each frame, or called automatically as part of start()
-     * @inherited from yy-loop
-     */
-    // update()
-
-    /**
-     * adds a callback to the loop
-     * @inherited from yy-loop
-     * @param {function} callback
-     * @param {number} [time=0] in milliseconds to call this update (0=every frame)
-     * @param {number} [count=0] number of times to run this update (0=infinite)
-     * @return {object} entry - used to remove or change the parameters of the update
-     */
-    // interval(callback, time, count)
-
-    /**
-     * adds a one-time callback to the loop
-     * @inherited from yy-loop
-     * @param {function} callback
-     * @param {number} time in milliseconds to call this update
-     * @return {object} entry - used to remove or change the parameters of the update
-     */
-    // timeout(callback, time)
-
-    /**
-     * remove a callback from the loop
-     * @inherited from yy-loop
-     * @param {object} entry - returned by add()
-     */
-    // remove(entry)
-
-    /**
-     * @inherited from yy-loop
-     * removes all callbacks from the loop
-     */
-    // removeAll()
-
-    /**
-     * @inherited from yy-loop
-     * @type {number} count of all animations
-     */
-    // get count()
-
-    /**
-     * @inherited from yy-loop
-     * @type {number} count of running animations
-     */
-    // get countRunning()
+    stop()
 
 ```
 ## license  
