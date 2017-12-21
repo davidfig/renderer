@@ -105,7 +105,7 @@ window.onload = function ()
     FPS()
     require('./highlight')('https://github.com/davidfig/renderer')
 }
-},{"..":400,"./highlight":2,"easyedit":6,"pixi-ease":193,"pixi.js":341,"yy-random":399}],2:[function(require,module,exports){
+},{"..":396,"./highlight":2,"easyedit":6,"pixi-ease":193,"pixi.js":337,"yy-random":395}],2:[function(require,module,exports){
 const forkMe = require('fork-me-github')
 
 module.exports = function highlight(url)
@@ -19216,11 +19216,9 @@ module.exports = {
     angle: require('./src/angle'),
     target: require('./src/target'),
     movie: require('./src/movie'),
-    load: require('./src/load'),
-
-    default: new list()
+    load: require('./src/load')
 }
-},{"./src/angle":199,"./src/face":200,"./src/list":201,"./src/load":202,"./src/movie":203,"./src/shake":204,"./src/target":205,"./src/tint":206,"./src/to":207,"./src/wait":208}],194:[function(require,module,exports){
+},{"./src/angle":195,"./src/face":196,"./src/list":197,"./src/load":198,"./src/movie":199,"./src/shake":200,"./src/target":201,"./src/tint":202,"./src/to":203,"./src/wait":204}],194:[function(require,module,exports){
 'use strict';
 
 var has = Object.prototype.hasOwnProperty
@@ -19559,290 +19557,6 @@ if ('undefined' !== typeof module) {
 }
 
 },{}],195:[function(require,module,exports){
-module.exports = require('./src/loop')
-},{"./src/loop":198}],196:[function(require,module,exports){
-arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],197:[function(require,module,exports){
-const Events = require('eventemitter3')
-
-/** Entry class for Loop */
-class Entry extends Events
-{
-    /**
-     * create an entry in the update loop
-     * used by Loop
-     * @param {function} callback
-     * @param {number} [time=0] in milliseconds to call this update
-     * @param {number} [count] number of times to run this update (undefined=infinite)
-     */
-    constructor(callback, time, count)
-    {
-        super()
-        this.callback = callback
-        this.time = time
-        this.current = 0
-        this.count = count
-    }
-
-    /**
-     * run the callback if available
-     * @private
-     * @param {number} elapsed
-     */
-    _update(elapsed)
-    {
-        let result
-        if (this.callback)
-        {
-            result = this.callback(elapsed, this)
-        }
-        this.emit('each', elapsed, this)
-        if (result || (!isNaN(this.count) && !--this.count))
-        {
-            this.emit('done', this)
-            return true
-        }
-    }
-
-    /**
-     * update checks time and runs the callback
-     * @param {number} elapsed
-     * @return {boolean} whether entry is complete and may be removed from list
-     */
-    update(elapsed)
-    {
-        if (!this._pause)
-        {
-            if (this.time)
-            {
-                this.current += elapsed
-                if (this.current >= this.time)
-                {
-                    this.current -= this.time
-                    return this._update(elapsed)
-                }
-            }
-            else
-            {
-                return this._update(elapsed)
-            }
-        }
-    }
-
-    /**
-     * @type {boolean} pause this entry
-     */
-    set pause(value)
-    {
-        this._pause = value
-    }
-    get pause()
-    {
-        return this._pause
-    }
-}
-
-module.exports = Entry
-},{"eventemitter3":196}],198:[function(require,module,exports){
-/* Copyright (c) 2017 YOPEY YOPEY LLC */
-
-const Events = require('eventemitter3')
-
-class Loop extends Events
-{
-    /**
-     * basic loop support
-     * @param {object} [options]
-     * @param {number} [options.maxFrameTime=1000/60] maximum time in milliseconds for a frame
-     * @param {object} [options.pauseOnBlur] pause loop when app loses focus, start it when app regains focus
-     *
-     * @event each(elapsed, Loop, elapsedInLoop)
-     * @event start(Loop)
-     * @event stop(Loop)
-     */
-    constructor(options)
-    {
-        super()
-        options = options || {}
-        this.maxFrameTime = options.maxFrameTime || 1000 / 60
-        if (options.pauseOnBlur)
-        {
-            window.addEventListener('blur', this.stopBlur.bind(this))
-            window.addEventListener('focus', this.startBlur.bind(this))
-        }
-        this.list = []
-    }
-
-    /**
-     * start requestAnimationFrame() loop
-     * @return {Loop} this
-     */
-    start()
-    {
-        if (!this.running)
-        {
-            this.running = true
-            if (!this.waiting)
-            {
-                this.loop()
-            }
-            this.emit('start', this)
-        }
-        return this
-    }
-
-    /**
-     * handler for focus event
-     * @private
-     */
-    startBlur()
-    {
-        if (this.blurred)
-        {
-            this.start()
-            this.blurred = false
-        }
-    }
-
-    /**
-     * handler for blur event
-     * @private
-     */
-    stopBlur()
-    {
-        if (this.running)
-        {
-            this.stop()
-            this.blurred = true
-        }
-    }
-
-    /**
-     * stop loop
-     * @return {Loop} this
-     */
-    stop()
-    {
-        this.running = false
-        this.blurred = false
-        this.emit('stop', this)
-        return this
-    }
-
-    /**
-     * loop through updates; can be called manually each frame, or called automatically as part of start()
-     */
-    update()
-    {
-        const now = performance.now()
-        let elapsed = now - this.last ? this.last : 0
-        elapsed = elapsed > this.maxFrameTime ? this.maxFrameTime : elapsed
-        for (let entry of this.list)
-        {
-            if (entry.update(elapsed))
-            {
-                this.remove(entry)
-            }
-        }
-        this.emit('each', elapsed, this, now - performance.now())
-        this.last = now
-    }
-
-    /**
-     * internal loop through animations
-     * @private
-     */
-    loop()
-    {
-        if (this.running)
-        {
-            this.waiting = false
-            this.update()
-            requestAnimationFrame(this.loop.bind(this))
-            this.waiting = true
-        }
-        else
-        {
-            this.waiting = false
-        }
-    }
-
-    /**
-     * adds a callback to the loop
-     * @param {function} callback
-     * @param {number} [time=0] in milliseconds to call this update (0=every frame)
-     * @param {number} [count=0] number of times to run this update (0=infinite)
-     * @return {object} entry - used to remove or change the parameters of the update
-     */
-    interval(callback, time, count)
-    {
-        const entry = new Entry(callback, time, count)
-        this.list.push(entry)
-        return entry
-    }
-
-    /**
-     * adds a one-time callback to the loop
-     * @param {function} callback
-     * @param {number} time in milliseconds to call this update
-     * @return {object} entry - used to remove or change the parameters of the update
-     */
-    timeout(callback, time)
-    {
-        return this.interval(callback, time, 1)
-    }
-
-    /**
-     * remove a callback from the loop
-     * @param {object} entry - returned by add()
-     */
-    remove(entry)
-    {
-        const index = this.list.indexOf(entry)
-        if (index !== -1)
-        {
-            this.list.splice(index, 1)
-        }
-    }
-
-    /**
-     * removes all callbacks from the loop
-     */
-    removeAll()
-    {
-        this.list = []
-    }
-
-    /**
-     * @type {number} count of all animations
-     */
-    get count()
-    {
-        return this.list.length
-    }
-
-    /**
-     * @type {number} count of running animations
-     */
-    get countRunning()
-    {
-        let count = 0
-        for (let entry of this.list)
-        {
-            if (!entry.pause)
-            {
-                count++
-            }
-        }
-        return count
-    }
-}
-
-const Entry = require('./entry')
-
-Loop.entry = Entry
-module.exports = Loop
-},{"./entry":197,"eventemitter3":196}],199:[function(require,module,exports){
 const wait = require('./wait')
 
 /** animate object's {x, y} using an angle */
@@ -19874,10 +19588,6 @@ module.exports = class angle extends wait
 
     save()
     {
-        if (this.options.cancel)
-        {
-            return null
-        }
         const save = super.save()
         save.angle = this.angle
         save.speed = this.speed
@@ -19913,7 +19623,7 @@ module.exports = class angle extends wait
         this.angle += Math.PI
     }
 }
-},{"./wait":208}],200:[function(require,module,exports){
+},{"./wait":204}],196:[function(require,module,exports){
 const Angle = require('yy-angle')
 const wait = require('./wait')
 
@@ -19983,7 +19693,7 @@ module.exports = class face extends wait
         }
     }
 }
-},{"./wait":208,"yy-angle":391}],201:[function(require,module,exports){
+},{"./wait":204,"yy-angle":387}],197:[function(require,module,exports){
 const Loop = require('yy-loop')
 
 const Angle = require('./angle')
@@ -20053,9 +19763,9 @@ module.exports = class List extends Loop
     /**
      * update frame; can be called manually or automatically with start()
      */
-    update()
+    update(elapsed)
     {
-        super.update()
+        super.update(elapsed)
         if (this.list.length === 0 && !this.empty)
         {
             this.emit('done', this)
@@ -20134,7 +19844,7 @@ module.exports = class List extends Loop
      */
     // timeout(callback, time)
 }
-},{"./angle":199,"./face":200,"./load":202,"./movie":203,"./shake":204,"./target":205,"./tint":206,"./to":207,"./wait":208,"yy-loop":195}],202:[function(require,module,exports){
+},{"./angle":195,"./face":196,"./load":198,"./movie":199,"./shake":200,"./target":201,"./tint":202,"./to":203,"./wait":204,"yy-loop":391}],198:[function(require,module,exports){
 const wait = require('./wait')
 const to = require('./to')
 const tint = require('./tint')
@@ -20175,7 +19885,7 @@ module.exports = function load(object, load)
             return new movie(object, object[1], null, options)
     }
 }
-},{"./angle":199,"./face":200,"./movie":203,"./shake":204,"./target":205,"./tint":206,"./to":207,"./wait":208}],203:[function(require,module,exports){
+},{"./angle":195,"./face":196,"./movie":199,"./shake":200,"./target":201,"./tint":202,"./to":203,"./wait":204}],199:[function(require,module,exports){
 const wait = require('./wait')
 
 /**
@@ -20196,7 +19906,6 @@ module.exports = class movie extends wait
      * @param {Function} [options.load] loads an animation using a .save() object note the * parameters below cannot be loaded and must be re-set
      * @param {Function} [options.ease] function from easing.js (see http://easings.net for examples)
      * @emits {done} animation expires
-     * @emits {cancel} animation is cancelled
      * @emits {wait} each update during a wait
      * @emits {first} first update when animation starts
      * @emits {each} each update while animation is running
@@ -20213,7 +19922,6 @@ module.exports = class movie extends wait
             this.list = object
             this.object = this.list[0]
         }
-        this.ease = options.ease || this.noEase
         if (options.load)
         {
             this.load(options.load)
@@ -20232,10 +19940,6 @@ module.exports = class movie extends wait
 
     save()
     {
-        if (this.options.cancel)
-        {
-            return null
-        }
         const save = super.save()
         save.goto = this.goto
         save.current = this.current
@@ -20266,7 +19970,7 @@ module.exports = class movie extends wait
 
     calculate()
     {
-        let index = Math.round(this.ease(this.time, 0, this.length - 1, this.duration))
+        let index = Math.round(this.options.ease(this.time, 0, this.length - 1, this.duration))
         if (this.isReverse)
         {
             index = this.length - 1 - index
@@ -20284,7 +19988,7 @@ module.exports = class movie extends wait
         }
     }
 }
-},{"./wait":208}],204:[function(require,module,exports){
+},{"./wait":204}],200:[function(require,module,exports){
 const wait = require('./wait')
 
 /**
@@ -20334,10 +20038,6 @@ module.exports = class shake extends wait
 
     save()
     {
-        if (this.options.cancel)
-        {
-            return null
-        }
         const save = super.save()
         save.start = this.start
         save.amount = this.amount
@@ -20393,7 +20093,7 @@ module.exports = class shake extends wait
         }
     }
 }
-},{"./wait":208}],205:[function(require,module,exports){
+},{"./wait":204}],201:[function(require,module,exports){
 const wait = require('./wait')
 
 /** move an object to a target's location */
@@ -20425,10 +20125,6 @@ module.exports = class target extends wait
 
     save()
     {
-        if (this.options.cancel)
-        {
-            return null
-        }
         const save = super.save()
         save.speed = this.speed
         save.keepAlive = this.options.keepAlive
@@ -20470,7 +20166,7 @@ module.exports = class target extends wait
         }
     }
 }
-},{"./wait":208}],206:[function(require,module,exports){
+},{"./wait":204}],202:[function(require,module,exports){
 const Color = require('yy-color')
 const wait = require('./wait')
 
@@ -20494,7 +20190,6 @@ module.exports = class tint extends wait
             this.object = this.list[0]
         }
         this.duration = duration
-        this.ease = this.options.ease || this.noEase
         if (options.load)
         {
             this.load(options.load)
@@ -20512,10 +20207,6 @@ module.exports = class tint extends wait
 
     save()
     {
-        if (this.options.cancel)
-        {
-            return null
-        }
         const save = super.save()
         save.start = this.start
         save.to = this.to
@@ -20531,7 +20222,7 @@ module.exports = class tint extends wait
 
     calculate()
     {
-        const percent = this.ease(this.time, 0, 1, this.duration)
+        const percent = this.options.ease(this.time, 0, 1, this.duration)
         if (this.tints)
         {
             const each = 1 / (this.tints.length - 1)
@@ -20593,7 +20284,7 @@ module.exports = class tint extends wait
         }
     }
 }
-},{"./wait":208,"yy-color":392}],207:[function(require,module,exports){
+},{"./wait":204,"yy-color":388}],203:[function(require,module,exports){
 const wait = require('./wait')
 
 /** animate any numeric parameter of an object or array of objects */
@@ -20608,11 +20299,9 @@ module.exports = class to extends wait
      * @param {boolean} [options.pause] start the animation paused
      * @param {boolean|number} [options.repeat] true: repeat animation forever n: repeat animation n times
      * @param {boolean|number} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
-     * @param {boolean|number} [options.continue] true: continue animation with new starting values n: continue animation n times
      * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
      * @param {string|Function} [options.ease] name or function from easing.js (see http://easings.net for examples)
      * @emits to:done animation expires
-     * @emits to:cancel animation is cancelled
      * @emits to:wait each update during a wait
      * @emits to:first first update when animation starts
      * @emits to:each each update while animation is running
@@ -20629,7 +20318,6 @@ module.exports = class to extends wait
             this.list = object
             this.object = this.list[0]
         }
-        this.ease = options.ease || this.noEase
         if (options.load)
         {
             this.load(options.load)
@@ -20657,10 +20345,6 @@ module.exports = class to extends wait
 
     save()
     {
-        if (this.options.cancel)
-        {
-            return null
-        }
         const save = super.save()
         save.goto = this.goto
         save.start = this.start
@@ -20694,7 +20378,7 @@ module.exports = class to extends wait
             // handles keys with one additional level e.g.: goto = {scale: {x: 5, y: 3}}
             if (isNaN(goto[key]))
             {
-                keys[i] = {key: key, children: []}
+                keys[i] = { key: key, children: [] }
                 start[i] = []
                 delta[i] = []
                 let j = 0
@@ -20729,12 +20413,12 @@ module.exports = class to extends wait
         const delta = this.delta
         const start = this.start
 
-        for (let i = 0; i < keys.length; i++)
+        for (let i = 0, _i = keys.length; i < _i; i++)
         {
             const key = keys[i]
             if (isNaN(goto[key]))
             {
-                for (let j = 0; j < key.children.length; j++)
+                for (let j = 0, _j = key.children.length; j < _j; j++)
                 {
                     delta[i][j] = -delta[i][j]
                     start[i][j] = parseFloat(object[key.key][key.children[j]])
@@ -20744,32 +20428,6 @@ module.exports = class to extends wait
             else
             {
                 delta[i] = -delta[i]
-                start[i] = parseFloat(object[key])
-                start[i] = isNaN(start[i]) ? 0 : start[i]
-            }
-        }
-    }
-
-    continue()
-    {
-        const object = this.object
-        const keys = this.keys
-        const goto = this.goto
-        const start = this.start
-
-        for (let i = 0; i < keys.length; i++)
-        {
-            const key = keys[i]
-            if (isNaN(goto[key]))
-            {
-                for (let j = 0; j < key.children.length; j++)
-                {
-                    this.start[i][j] = parseFloat(object[key.key][key.children[j]])
-                    this.start[i][j] = isNaN(start[i][j]) ? 0 : start[i][j]
-                }
-            }
-            else
-            {
                 start[i] = parseFloat(object[key])
                 start[i] = isNaN(start[i]) ? 0 : start[i]
             }
@@ -20786,20 +20444,20 @@ module.exports = class to extends wait
         const start = this.start
         const delta = this.delta
         const duration = this.duration
-        const ease = this.ease
-        for (let i = 0; i < this.keys.length; i++)
+        const ease = this.options.ease
+        for (let i = 0, _i = this.keys.length; i < _i; i++)
         {
             const key = keys[i]
             if (isNaN(goto[key]))
             {
                 const key1 = key.key
-                for (let j = 0; j < key.children.length; j++)
+                for (let j = 0, _j = key.children.length; j < _j; j++)
                 {
                     const key2 = key.children[j]
                     const others = object[key1][key2] = (time >= duration) ? start[i][j] + delta[i][j] : ease(time, start[i][j], delta[i][j], duration)
                     if (list)
                     {
-                        for (let k = 1; k < list.length; k++)
+                        for (let k = 1, _k = list.length; k < _k; k++)
                         {
                             list[k][key1][key2] = others
                         }
@@ -20812,7 +20470,7 @@ module.exports = class to extends wait
                 const others = object[key] = (time >= duration) ? start[i] + delta[i] : ease(time, start[i], delta[i], duration)
                 if (list)
                 {
-                    for (let j = 1; j < this.list.length; j++)
+                    for (let j = 1, _j = this.list.length; j < _j; j++)
                     {
                         list[j][key] = others
                     }
@@ -20821,7 +20479,7 @@ module.exports = class to extends wait
         }
     }
 }
-},{"./wait":208}],208:[function(require,module,exports){
+},{"./wait":204}],204:[function(require,module,exports){
 const Easing = require('penner')
 const EventEmitter = require('eventemitter3')
 
@@ -20834,13 +20492,12 @@ module.exports = class wait extends EventEmitter
      * @param {boolean} [options.pause] start the animation paused
      * @param {(boolean|number)} [options.repeat] true: repeat animation forever n: repeat animation n times
      * @param {(boolean|number)} [options.reverse] true: reverse animation (if combined with repeat, then pulse) n: reverse animation n times
-     * @param {(boolean|number)} [options.continue] true: continue animation with new starting values n: continue animation n times
+     *
      * @param {number} [options.id] user-generated id (e.g., I use it to properly load animations when an object has multiple animations running)
-     * @param {boolean} [options.orphan] delete animation if .parent of object (or first object in list) is null
      * @param {Function} [options.load] loads an animation using an .save() object note the * parameters below cannot be loaded and must be re-set
      * @param {Function|string} [options.ease] function (or penner function name) from easing.js (see http://easings.net for examples)*
+     *
      * @emits {done} animation expires
-     * @emits {cancel} animation is cancelled
      * @emits {wait} each update during a wait
      * @emits {first} first update when animation starts
      * @emits {each} each update while animation is running
@@ -20863,6 +20520,7 @@ module.exports = class wait extends EventEmitter
         }
         if (this.options.ease && typeof this.options.ease !== 'function')
         {
+            this.options.easeName = this.options.ease
             this.options.ease = Easing[this.options.ease]
         }
         if (!this.options.ease)
@@ -20873,11 +20531,7 @@ module.exports = class wait extends EventEmitter
 
     save()
     {
-        if (this.options.cancel)
-        {
-            return null
-        }
-        const save = {type: this.type, time: this.time, duration: this.duration}
+        const save = { type: this.type, time: this.time, duration: this.duration, ease: this.options.easeName }
         const options = this.options
         if (options.wait)
         {
@@ -20899,14 +20553,6 @@ module.exports = class wait extends EventEmitter
         {
             save.reverse = options.reverse
         }
-        if (options.continue)
-        {
-            save.continue = options.continue
-        }
-        if (options.cancel)
-        {
-            save.cancel = options.cancel
-        }
         return save
     }
 
@@ -20916,9 +20562,17 @@ module.exports = class wait extends EventEmitter
         this.options.pause = load.pause
         this.options.repeat = load.repeat
         this.options.reverse = load.reverse
-        this.options.continue = load.continue
-        this.options.cancel = load.cancel
         this.options.id = load.id
+        this.options.ease = load.ease
+        if (this.options.ease && typeof this.options.ease !== 'function')
+        {
+            this.options.easeName = this.options.ease
+            this.options.ease = Easing[this.options.ease]
+        }
+        if (!this.options.ease)
+        {
+            this.options.ease = Easing['linear']
+        }
         this.time = load.time
         this.duration = load.duration
     }
@@ -20933,15 +20587,6 @@ module.exports = class wait extends EventEmitter
     get pause()
     {
         return this.options.pause
-    }
-
-    cancel()
-    {
-        this.options.cancel = true
-    }
-
-    done()
-    {
     }
 
     end(leftOver)
@@ -20979,16 +20624,6 @@ module.exports = class wait extends EventEmitter
             }
             this.emit('loop', this.list || this.object)
         }
-        else if (this.options.continue)
-        {
-            this.continue()
-            this.time = leftOver
-            if (this.options.continue !== true)
-            {
-                this.options.continue--
-            }
-            this.emit('loop', this.list || this.object)
-        }
         else
         {
             this.done()
@@ -21000,50 +20635,18 @@ module.exports = class wait extends EventEmitter
 
     update(elapsed)
     {
-        if (!this.options)
+        const options = this.options
+        if (options.pause)
         {
             return
         }
-        if (this.options.cancel)
+        if (options.wait)
         {
-            this.emit('cancel', this.list || this.object)
-            return true
-        }
-        if (this.options.orphan)
-        {
-            if (this.list)
+            options.wait -= elapsed
+            if (options.wait <= 0)
             {
-                if (!this.list[0].parent)
-                {
-                    return true
-                }
-            }
-            else if (!this.object.parent)
-            {
-                return true
-            }
-        }
-        if (this.options.restart)
-        {
-            this.restart()
-            this.options.pause = false
-        }
-        if (this.options.original)
-        {
-            this.time = 0
-            this.options.pause = false
-        }
-        if (this.options.pause)
-        {
-            return
-        }
-        if (this.options.wait)
-        {
-            this.options.wait -= elapsed
-            if (this.options.wait <= 0)
-            {
-                elapsed = -this.options.wait
-                this.options.wait = false
+                elapsed = -options.wait
+                options.wait = false
             }
             else
             {
@@ -21058,14 +20661,16 @@ module.exports = class wait extends EventEmitter
         }
         this.time += elapsed
         let leftOver = 0
-        if (this.duration !== 0 && this.time > this.duration)
+        const duration = this.duration
+        let time = this.time
+        if (duration !== 0 && time > duration)
         {
-            leftOver = this.time - this.duration
-            this.time = this.duration
+            leftOver = time - duration
+            this.time = time = duration
         }
         const allDone = this.calculate(elapsed)
         this.emit('each', elapsed, this.list || this.object, this)
-        if (this.type === 'Wait' || (this.duration !== 0 && this.time === this.duration))
+        if (this.type === 'Wait' || (duration !== 0 && time === duration))
         {
             return this.end(leftOver)
         }
@@ -21086,9 +20691,11 @@ module.exports = class wait extends EventEmitter
         return value
     }
 
-    calculate() {}
+    reverse() {}
+    calculate() { }
+    done() { }
 }
-},{"eventemitter3":194,"penner":192}],209:[function(require,module,exports){
+},{"eventemitter3":194,"penner":192}],205:[function(require,module,exports){
 var EMPTY_ARRAY_BUFFER = new ArrayBuffer(0);
 
 /**
@@ -21209,7 +20816,7 @@ Buffer.prototype.destroy = function(){
 
 module.exports = Buffer;
 
-},{}],210:[function(require,module,exports){
+},{}],206:[function(require,module,exports){
 
 var Texture = require('./GLTexture');
 
@@ -21437,7 +21044,7 @@ Framebuffer.createFloat32 = function(gl, width, height, data)
 
 module.exports = Framebuffer;
 
-},{"./GLTexture":212}],211:[function(require,module,exports){
+},{"./GLTexture":208}],207:[function(require,module,exports){
 
 var compileProgram = require('./shader/compileProgram'),
 	extractAttributes = require('./shader/extractAttributes'),
@@ -21533,7 +21140,7 @@ Shader.prototype.destroy = function()
 
 module.exports = Shader;
 
-},{"./shader/compileProgram":217,"./shader/extractAttributes":219,"./shader/extractUniforms":220,"./shader/generateUniformAccessObject":221,"./shader/setPrecision":225}],212:[function(require,module,exports){
+},{"./shader/compileProgram":213,"./shader/extractAttributes":215,"./shader/extractUniforms":216,"./shader/generateUniformAccessObject":217,"./shader/setPrecision":221}],208:[function(require,module,exports){
 
 /**
  * Helper class to create a WebGL Texture
@@ -21868,7 +21475,7 @@ Texture.fromData = function(gl, data, width, height)
 
 module.exports = Texture;
 
-},{}],213:[function(require,module,exports){
+},{}],209:[function(require,module,exports){
 
 // state object//
 var setVertexAttribArrays = require( './setVertexAttribArrays' );
@@ -22136,7 +21743,7 @@ VertexArrayObject.prototype.getSize = function()
     return attrib.buffer.data.length / (( attrib.stride/4 ) || attrib.attribute.size);
 };
 
-},{"./setVertexAttribArrays":216}],214:[function(require,module,exports){
+},{"./setVertexAttribArrays":212}],210:[function(require,module,exports){
 
 /**
  * Helper class to create a webGL Context
@@ -22164,7 +21771,7 @@ var createContext = function(canvas, options)
 
 module.exports = createContext;
 
-},{}],215:[function(require,module,exports){
+},{}],211:[function(require,module,exports){
 var gl = {
     createContext:          require('./createContext'),
     setVertexAttribArrays:  require('./setVertexAttribArrays'),
@@ -22191,7 +21798,7 @@ if (typeof window !== 'undefined')
     window.PIXI.glCore = gl;
 }
 
-},{"./GLBuffer":209,"./GLFramebuffer":210,"./GLShader":211,"./GLTexture":212,"./VertexArrayObject":213,"./createContext":214,"./setVertexAttribArrays":216,"./shader":222}],216:[function(require,module,exports){
+},{"./GLBuffer":205,"./GLFramebuffer":206,"./GLShader":207,"./GLTexture":208,"./VertexArrayObject":209,"./createContext":210,"./setVertexAttribArrays":212,"./shader":218}],212:[function(require,module,exports){
 // var GL_MAP = {};
 
 /**
@@ -22248,7 +21855,7 @@ var setVertexAttribArrays = function (gl, attribs, state)
 
 module.exports = setVertexAttribArrays;
 
-},{}],217:[function(require,module,exports){
+},{}],213:[function(require,module,exports){
 
 /**
  * @class
@@ -22330,7 +21937,7 @@ var compileShader = function (gl, type, src)
 
 module.exports = compileProgram;
 
-},{}],218:[function(require,module,exports){
+},{}],214:[function(require,module,exports){
 /**
  * @class
  * @memberof PIXI.glCore.shader
@@ -22410,7 +22017,7 @@ var booleanArray = function(size)
 
 module.exports = defaultValue;
 
-},{}],219:[function(require,module,exports){
+},{}],215:[function(require,module,exports){
 
 var mapType = require('./mapType');
 var mapSize = require('./mapSize');
@@ -22453,7 +22060,7 @@ var pointer = function(type, normalized, stride, start){
 
 module.exports = extractAttributes;
 
-},{"./mapSize":223,"./mapType":224}],220:[function(require,module,exports){
+},{"./mapSize":219,"./mapType":220}],216:[function(require,module,exports){
 var mapType = require('./mapType');
 var defaultValue = require('./defaultValue');
 
@@ -22490,7 +22097,7 @@ var extractUniforms = function(gl, program)
 
 module.exports = extractUniforms;
 
-},{"./defaultValue":218,"./mapType":224}],221:[function(require,module,exports){
+},{"./defaultValue":214,"./mapType":220}],217:[function(require,module,exports){
 /**
  * Extracts the attributes
  * @class
@@ -22613,7 +22220,7 @@ function getUniformGroup(nameTokens, uniform)
 
 module.exports = generateUniformAccessObject;
 
-},{}],222:[function(require,module,exports){
+},{}],218:[function(require,module,exports){
 module.exports = {
     compileProgram: require('./compileProgram'),
     defaultValue: require('./defaultValue'),
@@ -22624,7 +22231,7 @@ module.exports = {
     mapSize: require('./mapSize'),
     mapType: require('./mapType')
 };
-},{"./compileProgram":217,"./defaultValue":218,"./extractAttributes":219,"./extractUniforms":220,"./generateUniformAccessObject":221,"./mapSize":223,"./mapType":224,"./setPrecision":225}],223:[function(require,module,exports){
+},{"./compileProgram":213,"./defaultValue":214,"./extractAttributes":215,"./extractUniforms":216,"./generateUniformAccessObject":217,"./mapSize":219,"./mapType":220,"./setPrecision":221}],219:[function(require,module,exports){
 /**
  * @class
  * @memberof PIXI.glCore.shader
@@ -22662,7 +22269,7 @@ var GLSL_TO_SIZE = {
 
 module.exports = mapSize;
 
-},{}],224:[function(require,module,exports){
+},{}],220:[function(require,module,exports){
 
 
 var mapType = function(gl, type) 
@@ -22710,7 +22317,7 @@ var GL_TO_GLSL_TYPES = {
 
 module.exports = mapType;
 
-},{}],225:[function(require,module,exports){
+},{}],221:[function(require,module,exports){
 /**
  * Sets the float precision on the shader. If the precision is already present this function will do nothing
  * @param {string} src       the shader source
@@ -22730,7 +22337,7 @@ var setPrecision = function(src, precision)
 
 module.exports = setPrecision;
 
-},{}],226:[function(require,module,exports){
+},{}],222:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -23224,7 +22831,7 @@ exports.default = AccessibilityManager;
 core.WebGLRenderer.registerPlugin('accessibility', AccessibilityManager);
 core.CanvasRenderer.registerPlugin('accessibility', AccessibilityManager);
 
-},{"../core":251,"./accessibleTarget":227,"ismobilejs":188}],227:[function(require,module,exports){
+},{"../core":247,"./accessibleTarget":223,"ismobilejs":188}],223:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -23282,7 +22889,7 @@ exports.default = {
   _accessibleDiv: false
 };
 
-},{}],228:[function(require,module,exports){
+},{}],224:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -23307,7 +22914,7 @@ Object.defineProperty(exports, 'AccessibilityManager', {
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./AccessibilityManager":226,"./accessibleTarget":227}],229:[function(require,module,exports){
+},{"./AccessibilityManager":222,"./accessibleTarget":223}],225:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -23530,7 +23137,7 @@ var Application = function () {
 
 exports.default = Application;
 
-},{"./autoDetectRenderer":231,"./const":232,"./display/Container":234,"./settings":287,"./ticker":307}],230:[function(require,module,exports){
+},{"./autoDetectRenderer":227,"./const":228,"./display/Container":230,"./settings":283,"./ticker":303}],226:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -23594,7 +23201,7 @@ var Shader = function (_GLShader) {
 
 exports.default = Shader;
 
-},{"./settings":287,"pixi-gl-core":215}],231:[function(require,module,exports){
+},{"./settings":283,"pixi-gl-core":211}],227:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -23663,7 +23270,7 @@ function autoDetectRenderer(options, arg1, arg2, arg3) {
     return new _CanvasRenderer2.default(options, arg1, arg2);
 }
 
-},{"./renderers/canvas/CanvasRenderer":263,"./renderers/webgl/WebGLRenderer":270,"./utils":311}],232:[function(require,module,exports){
+},{"./renderers/canvas/CanvasRenderer":259,"./renderers/webgl/WebGLRenderer":266,"./utils":307}],228:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -24006,7 +23613,7 @@ var UPDATE_PRIORITY = exports.UPDATE_PRIORITY = {
   UTILITY: -50
 };
 
-},{}],233:[function(require,module,exports){
+},{}],229:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -24349,7 +23956,7 @@ var Bounds = function () {
 
 exports.default = Bounds;
 
-},{"../math":256}],234:[function(require,module,exports){
+},{"../math":252}],230:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -24967,7 +24574,7 @@ var Container = function (_DisplayObject) {
 exports.default = Container;
 Container.prototype.containerUpdateTransform = Container.prototype.updateTransform;
 
-},{"../utils":311,"./DisplayObject":235}],235:[function(require,module,exports){
+},{"../utils":307,"./DisplayObject":231}],231:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -25659,7 +25266,7 @@ var DisplayObject = function (_EventEmitter) {
 exports.default = DisplayObject;
 DisplayObject.prototype.displayObjectUpdateTransform = DisplayObject.prototype.updateTransform;
 
-},{"../const":232,"../math":256,"../settings":287,"./Bounds":233,"./Transform":236,"./TransformStatic":238,"eventemitter3":7}],236:[function(require,module,exports){
+},{"../const":228,"../math":252,"../settings":283,"./Bounds":229,"./Transform":232,"./TransformStatic":234,"eventemitter3":7}],232:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -25840,7 +25447,7 @@ var Transform = function (_TransformBase) {
 
 exports.default = Transform;
 
-},{"../math":256,"./TransformBase":237}],237:[function(require,module,exports){
+},{"../math":252,"./TransformBase":233}],233:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -25927,7 +25534,7 @@ TransformBase.prototype.updateWorldTransform = TransformBase.prototype.updateTra
 
 TransformBase.IDENTITY = new TransformBase();
 
-},{"../math":256}],238:[function(require,module,exports){
+},{"../math":252}],234:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -26137,7 +25744,7 @@ var TransformStatic = function (_TransformBase) {
 
 exports.default = TransformStatic;
 
-},{"../math":256,"./TransformBase":237}],239:[function(require,module,exports){
+},{"../math":252,"./TransformBase":233}],235:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -27309,7 +26916,7 @@ exports.default = Graphics;
 
 Graphics._SPRITE_TEXTURE = null;
 
-},{"../const":232,"../display/Bounds":233,"../display/Container":234,"../math":256,"../renderers/canvas/CanvasRenderer":263,"../sprites/Sprite":288,"../textures/RenderTexture":299,"../textures/Texture":301,"../utils":311,"./GraphicsData":240,"./utils/bezierCurveTo":242}],240:[function(require,module,exports){
+},{"../const":228,"../display/Bounds":229,"../display/Container":230,"../math":252,"../renderers/canvas/CanvasRenderer":259,"../sprites/Sprite":284,"../textures/RenderTexture":295,"../textures/Texture":297,"../utils":307,"./GraphicsData":236,"./utils/bezierCurveTo":238}],236:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -27431,7 +27038,7 @@ var GraphicsData = function () {
 
 exports.default = GraphicsData;
 
-},{}],241:[function(require,module,exports){
+},{}],237:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -27700,7 +27307,7 @@ exports.default = CanvasGraphicsRenderer;
 
 _CanvasRenderer2.default.registerPlugin('graphics', CanvasGraphicsRenderer);
 
-},{"../../const":232,"../../renderers/canvas/CanvasRenderer":263}],242:[function(require,module,exports){
+},{"../../const":228,"../../renderers/canvas/CanvasRenderer":259}],238:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -27750,7 +27357,7 @@ function bezierCurveTo(fromX, fromY, cpX, cpY, cpX2, cpY2, toX, toY) {
     return path;
 }
 
-},{}],243:[function(require,module,exports){
+},{}],239:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -28015,7 +27622,7 @@ exports.default = GraphicsRenderer;
 
 _WebGLRenderer2.default.registerPlugin('graphics', GraphicsRenderer);
 
-},{"../../const":232,"../../renderers/webgl/WebGLRenderer":270,"../../renderers/webgl/utils/ObjectRenderer":280,"../../utils":311,"./WebGLGraphicsData":244,"./shaders/PrimitiveShader":245,"./utils/buildCircle":246,"./utils/buildPoly":248,"./utils/buildRectangle":249,"./utils/buildRoundedRectangle":250}],244:[function(require,module,exports){
+},{"../../const":228,"../../renderers/webgl/WebGLRenderer":266,"../../renderers/webgl/utils/ObjectRenderer":276,"../../utils":307,"./WebGLGraphicsData":240,"./shaders/PrimitiveShader":241,"./utils/buildCircle":242,"./utils/buildPoly":244,"./utils/buildRectangle":245,"./utils/buildRoundedRectangle":246}],240:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -28158,7 +27765,7 @@ var WebGLGraphicsData = function () {
 
 exports.default = WebGLGraphicsData;
 
-},{"pixi-gl-core":215}],245:[function(require,module,exports){
+},{"pixi-gl-core":211}],241:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -28203,7 +27810,7 @@ var PrimitiveShader = function (_Shader) {
 
 exports.default = PrimitiveShader;
 
-},{"../../../Shader":230}],246:[function(require,module,exports){
+},{"../../../Shader":226}],242:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -28296,7 +27903,7 @@ function buildCircle(graphicsData, webGLData, webGLDataNativeLines) {
     }
 }
 
-},{"../../../const":232,"../../../utils":311,"./buildLine":247}],247:[function(require,module,exports){
+},{"../../../const":228,"../../../utils":307,"./buildLine":243}],243:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -28566,7 +28173,7 @@ function buildNativeLine(graphicsData, webGLData) {
     }
 }
 
-},{"../../../math":256,"../../../utils":311}],248:[function(require,module,exports){
+},{"../../../math":252,"../../../utils":307}],244:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -28652,7 +28259,7 @@ function buildPoly(graphicsData, webGLData, webGLDataNativeLines) {
     }
 }
 
-},{"../../../utils":311,"./buildLine":247,"earcut":5}],249:[function(require,module,exports){
+},{"../../../utils":307,"./buildLine":243,"earcut":5}],245:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -28728,7 +28335,7 @@ function buildRectangle(graphicsData, webGLData, webGLDataNativeLines) {
     }
 }
 
-},{"../../../utils":311,"./buildLine":247}],250:[function(require,module,exports){
+},{"../../../utils":307,"./buildLine":243}],246:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -28884,7 +28491,7 @@ function quadraticBezierCurve(fromX, fromY, cpX, cpY, toX, toY) {
     return points;
 }
 
-},{"../../../utils":311,"./buildLine":247,"earcut":5}],251:[function(require,module,exports){
+},{"../../../utils":307,"./buildLine":243,"earcut":5}],247:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -29270,7 +28877,7 @@ exports.WebGLRenderer = _WebGLRenderer2.default; /**
                                                   * @namespace PIXI
                                                   */
 
-},{"./Application":229,"./Shader":230,"./autoDetectRenderer":231,"./const":232,"./display/Bounds":233,"./display/Container":234,"./display/DisplayObject":235,"./display/Transform":236,"./display/TransformBase":237,"./display/TransformStatic":238,"./graphics/Graphics":239,"./graphics/GraphicsData":240,"./graphics/canvas/CanvasGraphicsRenderer":241,"./graphics/webgl/GraphicsRenderer":243,"./math":256,"./renderers/canvas/CanvasRenderer":263,"./renderers/canvas/utils/CanvasRenderTarget":265,"./renderers/webgl/WebGLRenderer":270,"./renderers/webgl/filters/Filter":272,"./renderers/webgl/filters/spriteMask/SpriteMaskFilter":275,"./renderers/webgl/managers/WebGLManager":279,"./renderers/webgl/utils/ObjectRenderer":280,"./renderers/webgl/utils/Quad":281,"./renderers/webgl/utils/RenderTarget":282,"./settings":287,"./sprites/Sprite":288,"./sprites/canvas/CanvasSpriteRenderer":289,"./sprites/canvas/CanvasTinter":290,"./sprites/webgl/SpriteRenderer":292,"./text/Text":294,"./text/TextMetrics":295,"./text/TextStyle":296,"./textures/BaseRenderTexture":297,"./textures/BaseTexture":298,"./textures/RenderTexture":299,"./textures/Spritesheet":300,"./textures/Texture":301,"./textures/TextureMatrix":302,"./textures/TextureUvs":303,"./textures/VideoBaseTexture":304,"./ticker":307,"./utils":311,"pixi-gl-core":215}],252:[function(require,module,exports){
+},{"./Application":225,"./Shader":226,"./autoDetectRenderer":227,"./const":228,"./display/Bounds":229,"./display/Container":230,"./display/DisplayObject":231,"./display/Transform":232,"./display/TransformBase":233,"./display/TransformStatic":234,"./graphics/Graphics":235,"./graphics/GraphicsData":236,"./graphics/canvas/CanvasGraphicsRenderer":237,"./graphics/webgl/GraphicsRenderer":239,"./math":252,"./renderers/canvas/CanvasRenderer":259,"./renderers/canvas/utils/CanvasRenderTarget":261,"./renderers/webgl/WebGLRenderer":266,"./renderers/webgl/filters/Filter":268,"./renderers/webgl/filters/spriteMask/SpriteMaskFilter":271,"./renderers/webgl/managers/WebGLManager":275,"./renderers/webgl/utils/ObjectRenderer":276,"./renderers/webgl/utils/Quad":277,"./renderers/webgl/utils/RenderTarget":278,"./settings":283,"./sprites/Sprite":284,"./sprites/canvas/CanvasSpriteRenderer":285,"./sprites/canvas/CanvasTinter":286,"./sprites/webgl/SpriteRenderer":288,"./text/Text":290,"./text/TextMetrics":291,"./text/TextStyle":292,"./textures/BaseRenderTexture":293,"./textures/BaseTexture":294,"./textures/RenderTexture":295,"./textures/Spritesheet":296,"./textures/Texture":297,"./textures/TextureMatrix":298,"./textures/TextureUvs":299,"./textures/VideoBaseTexture":300,"./ticker":303,"./utils":307,"pixi-gl-core":211}],248:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -29463,7 +29070,7 @@ var GroupD8 = {
 
 exports.default = GroupD8;
 
-},{"./Matrix":253}],253:[function(require,module,exports){
+},{"./Matrix":249}],249:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -29994,7 +29601,7 @@ var Matrix = function () {
 
 exports.default = Matrix;
 
-},{"./Point":255}],254:[function(require,module,exports){
+},{"./Point":251}],250:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -30111,7 +29718,7 @@ var ObservablePoint = function () {
 
 exports.default = ObservablePoint;
 
-},{}],255:[function(require,module,exports){
+},{}],251:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -30202,7 +29809,7 @@ var Point = function () {
 
 exports.default = Point;
 
-},{}],256:[function(require,module,exports){
+},{}],252:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30290,7 +29897,7 @@ Object.defineProperty(exports, 'RoundedRectangle', {
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./GroupD8":252,"./Matrix":253,"./ObservablePoint":254,"./Point":255,"./shapes/Circle":257,"./shapes/Ellipse":258,"./shapes/Polygon":259,"./shapes/Rectangle":260,"./shapes/RoundedRectangle":261}],257:[function(require,module,exports){
+},{"./GroupD8":248,"./Matrix":249,"./ObservablePoint":250,"./Point":251,"./shapes/Circle":253,"./shapes/Ellipse":254,"./shapes/Polygon":255,"./shapes/Rectangle":256,"./shapes/RoundedRectangle":257}],253:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30404,7 +30011,7 @@ var Circle = function () {
 
 exports.default = Circle;
 
-},{"../../const":232,"./Rectangle":260}],258:[function(require,module,exports){
+},{"../../const":228,"./Rectangle":256}],254:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30526,7 +30133,7 @@ var Ellipse = function () {
 
 exports.default = Ellipse;
 
-},{"../../const":232,"./Rectangle":260}],259:[function(require,module,exports){
+},{"../../const":228,"./Rectangle":256}],255:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30657,7 +30264,7 @@ var Polygon = function () {
 
 exports.default = Polygon;
 
-},{"../../const":232,"../Point":255}],260:[function(require,module,exports){
+},{"../../const":228,"../Point":251}],256:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30920,7 +30527,7 @@ var Rectangle = function () {
 
 exports.default = Rectangle;
 
-},{"../../const":232}],261:[function(require,module,exports){
+},{"../../const":228}],257:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -31053,7 +30660,7 @@ var RoundedRectangle = function () {
 
 exports.default = RoundedRectangle;
 
-},{"../../const":232}],262:[function(require,module,exports){
+},{"../../const":228}],258:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -31418,7 +31025,7 @@ var SystemRenderer = function (_EventEmitter) {
 
 exports.default = SystemRenderer;
 
-},{"../const":232,"../display/Container":234,"../math":256,"../settings":287,"../textures/RenderTexture":299,"../utils":311,"eventemitter3":7}],263:[function(require,module,exports){
+},{"../const":228,"../display/Container":230,"../math":252,"../settings":283,"../textures/RenderTexture":295,"../utils":307,"eventemitter3":7}],259:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -31783,7 +31390,7 @@ var CanvasRenderer = function (_SystemRenderer) {
 exports.default = CanvasRenderer;
 _utils.pluginTarget.mixin(CanvasRenderer);
 
-},{"../../const":232,"../../settings":287,"../../utils":311,"../SystemRenderer":262,"./utils/CanvasMaskManager":264,"./utils/CanvasRenderTarget":265,"./utils/mapCanvasBlendModesToPixi":267}],264:[function(require,module,exports){
+},{"../../const":228,"../../settings":283,"../../utils":307,"../SystemRenderer":258,"./utils/CanvasMaskManager":260,"./utils/CanvasRenderTarget":261,"./utils/mapCanvasBlendModesToPixi":263}],260:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -31952,7 +31559,7 @@ var CanvasMaskManager = function () {
 
 exports.default = CanvasMaskManager;
 
-},{"../../../const":232}],265:[function(require,module,exports){
+},{"../../../const":228}],261:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -32076,7 +31683,7 @@ var CanvasRenderTarget = function () {
 
 exports.default = CanvasRenderTarget;
 
-},{"../../../settings":287}],266:[function(require,module,exports){
+},{"../../../settings":283}],262:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -32137,7 +31744,7 @@ function canUseNewCanvasBlendModes() {
     return data[0] === 255 && data[1] === 0 && data[2] === 0;
 }
 
-},{}],267:[function(require,module,exports){
+},{}],263:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -32209,7 +31816,7 @@ function mapCanvasBlendModesToPixi() {
     return array;
 }
 
-},{"../../../const":232,"./canUseNewCanvasBlendModes":266}],268:[function(require,module,exports){
+},{"../../../const":228,"./canUseNewCanvasBlendModes":262}],264:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -32329,7 +31936,7 @@ var TextureGarbageCollector = function () {
 
 exports.default = TextureGarbageCollector;
 
-},{"../../const":232,"../../settings":287}],269:[function(require,module,exports){
+},{"../../const":228,"../../settings":283}],265:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -32585,7 +32192,7 @@ var TextureManager = function () {
 
 exports.default = TextureManager;
 
-},{"../../const":232,"../../utils":311,"./utils/RenderTarget":282,"pixi-gl-core":215}],270:[function(require,module,exports){
+},{"../../const":228,"../../utils":307,"./utils/RenderTarget":278,"pixi-gl-core":211}],266:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -33402,7 +33009,7 @@ var WebGLRenderer = function (_SystemRenderer) {
 exports.default = WebGLRenderer;
 _utils.pluginTarget.mixin(WebGLRenderer);
 
-},{"../../const":232,"../../textures/BaseTexture":298,"../../utils":311,"../SystemRenderer":262,"./TextureGarbageCollector":268,"./TextureManager":269,"./WebGLState":271,"./managers/FilterManager":276,"./managers/MaskManager":277,"./managers/StencilManager":278,"./utils/ObjectRenderer":280,"./utils/RenderTarget":282,"./utils/mapWebGLDrawModesToPixi":285,"./utils/validateContext":286,"pixi-gl-core":215}],271:[function(require,module,exports){
+},{"../../const":228,"../../textures/BaseTexture":294,"../../utils":307,"../SystemRenderer":258,"./TextureGarbageCollector":264,"./TextureManager":265,"./WebGLState":267,"./managers/FilterManager":272,"./managers/MaskManager":273,"./managers/StencilManager":274,"./utils/ObjectRenderer":276,"./utils/RenderTarget":278,"./utils/mapWebGLDrawModesToPixi":281,"./utils/validateContext":282,"pixi-gl-core":211}],267:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -33682,7 +33289,7 @@ var WebGLState = function () {
 
 exports.default = WebGLState;
 
-},{"./utils/mapWebGLBlendModesToPixi":284}],272:[function(require,module,exports){
+},{"./utils/mapWebGLBlendModesToPixi":280}],268:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -33878,7 +33485,7 @@ var Filter = function () {
 
 exports.default = Filter;
 
-},{"../../../const":232,"../../../settings":287,"../../../utils":311,"./extractUniformsFromSrc":273}],273:[function(require,module,exports){
+},{"../../../const":228,"../../../settings":283,"../../../utils":307,"./extractUniformsFromSrc":269}],269:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -33940,7 +33547,7 @@ function extractUniformsFromString(string) {
     return uniforms;
 }
 
-},{"pixi-gl-core":215}],274:[function(require,module,exports){
+},{"pixi-gl-core":211}],270:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -33999,7 +33606,7 @@ function calculateSpriteMatrix(outputMatrix, filterArea, textureSize, sprite) {
     return mappedMatrix;
 }
 
-},{"../../../math":256}],275:[function(require,module,exports){
+},{"../../../math":252}],271:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -34087,7 +33694,7 @@ var SpriteMaskFilter = function (_Filter) {
 
 exports.default = SpriteMaskFilter;
 
-},{"../../../../math":256,"../../../../textures/TextureMatrix":302,"../Filter":272,"path":402}],276:[function(require,module,exports){
+},{"../../../../math":252,"../../../../textures/TextureMatrix":298,"../Filter":268,"path":398}],272:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -34681,7 +34288,7 @@ var FilterManager = function (_WebGLManager) {
 
 exports.default = FilterManager;
 
-},{"../../../Shader":230,"../../../math":256,"../filters/filterTransforms":274,"../utils/Quad":281,"../utils/RenderTarget":282,"./WebGLManager":279,"bit-twiddle":3}],277:[function(require,module,exports){
+},{"../../../Shader":226,"../../../math":252,"../filters/filterTransforms":270,"../utils/Quad":277,"../utils/RenderTarget":278,"./WebGLManager":275,"bit-twiddle":3}],273:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -34891,7 +34498,7 @@ var MaskManager = function (_WebGLManager) {
 
 exports.default = MaskManager;
 
-},{"../filters/spriteMask/SpriteMaskFilter":275,"./WebGLManager":279}],278:[function(require,module,exports){
+},{"../filters/spriteMask/SpriteMaskFilter":271,"./WebGLManager":275}],274:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -35044,7 +34651,7 @@ var StencilManager = function (_WebGLManager) {
 
 exports.default = StencilManager;
 
-},{"./WebGLManager":279}],279:[function(require,module,exports){
+},{"./WebGLManager":275}],275:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -35099,7 +34706,7 @@ var WebGLManager = function () {
 
 exports.default = WebGLManager;
 
-},{}],280:[function(require,module,exports){
+},{}],276:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -35177,7 +34784,7 @@ var ObjectRenderer = function (_WebGLManager) {
 
 exports.default = ObjectRenderer;
 
-},{"../managers/WebGLManager":279}],281:[function(require,module,exports){
+},{"../managers/WebGLManager":275}],277:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -35358,7 +34965,7 @@ var Quad = function () {
 
 exports.default = Quad;
 
-},{"../../../utils/createIndicesForQuads":309,"pixi-gl-core":215}],282:[function(require,module,exports){
+},{"../../../utils/createIndicesForQuads":305,"pixi-gl-core":211}],278:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -35685,7 +35292,7 @@ var RenderTarget = function () {
 
 exports.default = RenderTarget;
 
-},{"../../../const":232,"../../../math":256,"../../../settings":287,"pixi-gl-core":215}],283:[function(require,module,exports){
+},{"../../../const":228,"../../../math":252,"../../../settings":283,"pixi-gl-core":211}],279:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -35760,7 +35367,7 @@ function generateIfTestSrc(maxIfs) {
     return src;
 }
 
-},{"pixi-gl-core":215}],284:[function(require,module,exports){
+},{"pixi-gl-core":211}],280:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -35809,7 +35416,7 @@ function mapWebGLBlendModesToPixi(gl) {
     return array;
 }
 
-},{"../../../const":232}],285:[function(require,module,exports){
+},{"../../../const":228}],281:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -35841,7 +35448,7 @@ function mapWebGLDrawModesToPixi(gl) {
   return object;
 }
 
-},{"../../../const":232}],286:[function(require,module,exports){
+},{"../../../const":228}],282:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -35857,7 +35464,7 @@ function validateContext(gl) {
     }
 }
 
-},{}],287:[function(require,module,exports){
+},{}],283:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -36092,7 +35699,7 @@ exports.default = {
 
 };
 
-},{"./utils/canUploadSameBuffer":308,"./utils/maxRecommendedTextures":313}],288:[function(require,module,exports){
+},{"./utils/canUploadSameBuffer":304,"./utils/maxRecommendedTextures":309}],284:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -36715,7 +36322,7 @@ var Sprite = function (_Container) {
 
 exports.default = Sprite;
 
-},{"../const":232,"../display/Container":234,"../math":256,"../textures/Texture":301,"../utils":311}],289:[function(require,module,exports){
+},{"../const":228,"../display/Container":230,"../math":252,"../textures/Texture":297,"../utils":307}],285:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -36868,7 +36475,7 @@ exports.default = CanvasSpriteRenderer;
 
 _CanvasRenderer2.default.registerPlugin('sprite', CanvasSpriteRenderer);
 
-},{"../../const":232,"../../math":256,"../../renderers/canvas/CanvasRenderer":263,"./CanvasTinter":290}],290:[function(require,module,exports){
+},{"../../const":228,"../../math":252,"../../renderers/canvas/CanvasRenderer":259,"./CanvasTinter":286}],286:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -37119,7 +36726,7 @@ CanvasTinter.tintMethod = CanvasTinter.canUseMultiply ? CanvasTinter.tintWithMul
 
 exports.default = CanvasTinter;
 
-},{"../../renderers/canvas/utils/canUseNewCanvasBlendModes":266,"../../utils":311}],291:[function(require,module,exports){
+},{"../../renderers/canvas/utils/canUseNewCanvasBlendModes":262,"../../utils":307}],287:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -37172,7 +36779,7 @@ var Buffer = function () {
 
 exports.default = Buffer;
 
-},{}],292:[function(require,module,exports){
+},{}],288:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -37723,7 +37330,7 @@ exports.default = SpriteRenderer;
 
 _WebGLRenderer2.default.registerPlugin('sprite', SpriteRenderer);
 
-},{"../../renderers/webgl/WebGLRenderer":270,"../../renderers/webgl/utils/ObjectRenderer":280,"../../renderers/webgl/utils/checkMaxIfStatmentsInShader":283,"../../settings":287,"../../utils":311,"../../utils/createIndicesForQuads":309,"./BatchBuffer":291,"./generateMultiTextureShader":293,"bit-twiddle":3,"pixi-gl-core":215}],293:[function(require,module,exports){
+},{"../../renderers/webgl/WebGLRenderer":266,"../../renderers/webgl/utils/ObjectRenderer":276,"../../renderers/webgl/utils/checkMaxIfStatmentsInShader":279,"../../settings":283,"../../utils":307,"../../utils/createIndicesForQuads":305,"./BatchBuffer":287,"./generateMultiTextureShader":289,"bit-twiddle":3,"pixi-gl-core":211}],289:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -37786,7 +37393,7 @@ function generateSampleSrc(maxTextures) {
     return src;
 }
 
-},{"../../Shader":230,"path":402}],294:[function(require,module,exports){
+},{"../../Shader":226,"path":398}],290:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -38441,7 +38048,7 @@ var Text = function (_Sprite) {
 
 exports.default = Text;
 
-},{"../const":232,"../math":256,"../settings":287,"../sprites/Sprite":288,"../textures/Texture":301,"../utils":311,"../utils/trimCanvas":316,"./TextMetrics":295,"./TextStyle":296}],295:[function(require,module,exports){
+},{"../const":228,"../math":252,"../settings":283,"../sprites/Sprite":284,"../textures/Texture":297,"../utils":307,"../utils/trimCanvas":312,"./TextMetrics":291,"./TextStyle":292}],291:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -38744,7 +38351,7 @@ TextMetrics._context = canvas.getContext('2d');
  */
 TextMetrics._fonts = {};
 
-},{}],296:[function(require,module,exports){
+},{}],292:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -39546,7 +39153,7 @@ function deepCopyProperties(target, source, propertyObj) {
     }
 }
 
-},{"../const":232,"../utils":311}],297:[function(require,module,exports){
+},{"../const":228,"../utils":307}],293:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -39708,7 +39315,7 @@ var BaseRenderTexture = function (_BaseTexture) {
 
 exports.default = BaseRenderTexture;
 
-},{"../settings":287,"./BaseTexture":298}],298:[function(require,module,exports){
+},{"../settings":283,"./BaseTexture":294}],294:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -40554,7 +40161,7 @@ var BaseTexture = function (_EventEmitter) {
 
 exports.default = BaseTexture;
 
-},{"../settings":287,"../utils":311,"../utils/determineCrossOrigin":310,"bit-twiddle":3,"eventemitter3":7}],299:[function(require,module,exports){
+},{"../settings":283,"../utils":307,"../utils/determineCrossOrigin":306,"bit-twiddle":3,"eventemitter3":7}],295:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -40708,7 +40315,7 @@ var RenderTexture = function (_Texture) {
 
 exports.default = RenderTexture;
 
-},{"./BaseRenderTexture":297,"./Texture":301}],300:[function(require,module,exports){
+},{"./BaseRenderTexture":293,"./Texture":297}],296:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -40970,7 +40577,7 @@ var Spritesheet = function () {
 
 exports.default = Spritesheet;
 
-},{"../":251,"../utils":311}],301:[function(require,module,exports){
+},{"../":247,"../utils":307}],297:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -41662,7 +41269,7 @@ Texture.WHITE = createWhiteTexture();
 removeAllHandlers(Texture.WHITE);
 removeAllHandlers(Texture.WHITE.baseTexture);
 
-},{"../math":256,"../settings":287,"../utils":311,"./BaseTexture":298,"./TextureUvs":303,"./VideoBaseTexture":304,"eventemitter3":7}],302:[function(require,module,exports){
+},{"../math":252,"../settings":283,"../utils":307,"./BaseTexture":294,"./TextureUvs":299,"./VideoBaseTexture":300,"eventemitter3":7}],298:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -41826,7 +41433,7 @@ var TextureMatrix = function () {
 
 exports.default = TextureMatrix;
 
-},{"../math/Matrix":253}],303:[function(require,module,exports){
+},{"../math/Matrix":249}],299:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -41931,7 +41538,7 @@ var TextureUvs = function () {
 
 exports.default = TextureUvs;
 
-},{"../math/GroupD8":252}],304:[function(require,module,exports){
+},{"../math/GroupD8":248}],300:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -42273,7 +41880,7 @@ function createSource(path, type) {
     return source;
 }
 
-},{"../const":232,"../ticker":307,"../utils":311,"../utils/determineCrossOrigin":310,"./BaseTexture":298}],305:[function(require,module,exports){
+},{"../const":228,"../ticker":303,"../utils":307,"../utils/determineCrossOrigin":306,"./BaseTexture":294}],301:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -42746,7 +42353,7 @@ var Ticker = function () {
 
 exports.default = Ticker;
 
-},{"../const":232,"../settings":287,"./TickerListener":306}],306:[function(require,module,exports){
+},{"../const":228,"../settings":283,"./TickerListener":302}],302:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -42920,7 +42527,7 @@ var TickerListener = function () {
 
 exports.default = TickerListener;
 
-},{}],307:[function(require,module,exports){
+},{}],303:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -43000,7 +42607,7 @@ shared.destroy = function () {
 exports.shared = shared;
 exports.Ticker = _Ticker2.default;
 
-},{"./Ticker":305}],308:[function(require,module,exports){
+},{"./Ticker":301}],304:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -43014,7 +42621,7 @@ function canUploadSameBuffer() {
 	return !ios;
 }
 
-},{}],309:[function(require,module,exports){
+},{}],305:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -43048,7 +42655,7 @@ function createIndicesForQuads(size) {
     return indices;
 }
 
-},{}],310:[function(require,module,exports){
+},{}],306:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -43104,7 +42711,7 @@ function determineCrossOrigin(url) {
     return '';
 }
 
-},{"url":408}],311:[function(require,module,exports){
+},{"url":404}],307:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -43578,7 +43185,7 @@ function premultiplyTintToRgba(tint, alpha, out, premultiply) {
     return out;
 }
 
-},{"../const":232,"../settings":287,"./mapPremultipliedBlendModes":312,"./mixin":314,"./pluginTarget":315,"eventemitter3":7,"ismobilejs":188,"remove-array-items":375}],312:[function(require,module,exports){
+},{"../const":228,"../settings":283,"./mapPremultipliedBlendModes":308,"./mixin":310,"./pluginTarget":311,"eventemitter3":7,"ismobilejs":188,"remove-array-items":371}],308:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -43621,7 +43228,7 @@ function mapPremultipliedBlendModes() {
     return array;
 }
 
-},{"../const":232}],313:[function(require,module,exports){
+},{"../const":228}],309:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -43643,7 +43250,7 @@ function maxRecommendedTextures(max) {
     return max;
 }
 
-},{"ismobilejs":188}],314:[function(require,module,exports){
+},{"ismobilejs":188}],310:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -43705,7 +43312,7 @@ function performMixins() {
     mixins.length = 0;
 }
 
-},{}],315:[function(require,module,exports){
+},{}],311:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -43771,7 +43378,7 @@ exports.default = {
     }
 };
 
-},{}],316:[function(require,module,exports){
+},{}],312:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -43847,7 +43454,7 @@ function trimCanvas(canvas) {
     };
 }
 
-},{}],317:[function(require,module,exports){
+},{}],313:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -44991,7 +44598,7 @@ function deprecation(core) {
     }
 }
 
-},{}],318:[function(require,module,exports){
+},{}],314:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -45171,7 +44778,7 @@ exports.default = CanvasExtract;
 
 core.CanvasRenderer.registerPlugin('extract', CanvasExtract);
 
-},{"../../core":251}],319:[function(require,module,exports){
+},{"../../core":247}],315:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -45196,7 +44803,7 @@ Object.defineProperty(exports, 'canvas', {
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./canvas/CanvasExtract":318,"./webgl/WebGLExtract":320}],320:[function(require,module,exports){
+},{"./canvas/CanvasExtract":314,"./webgl/WebGLExtract":316}],316:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -45419,7 +45026,7 @@ exports.default = WebGLExtract;
 
 core.WebGLRenderer.registerPlugin('extract', WebGLExtract);
 
-},{"../../core":251}],321:[function(require,module,exports){
+},{"../../core":247}],317:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -45828,7 +45435,7 @@ var AnimatedSprite = function (_core$Sprite) {
 
 exports.default = AnimatedSprite;
 
-},{"../core":251}],322:[function(require,module,exports){
+},{"../core":247}],318:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -46419,7 +46026,7 @@ exports.default = BitmapText;
 
 BitmapText.fonts = {};
 
-},{"../core":251,"../core/math/ObservablePoint":254,"../core/settings":287,"../core/utils":311}],323:[function(require,module,exports){
+},{"../core":247,"../core/math/ObservablePoint":250,"../core/settings":283,"../core/utils":307}],319:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -46865,7 +46472,7 @@ var TilingSprite = function (_core$Sprite) {
 
 exports.default = TilingSprite;
 
-},{"../core":251,"../core/sprites/canvas/CanvasTinter":290}],324:[function(require,module,exports){
+},{"../core":247,"../core/sprites/canvas/CanvasTinter":286}],320:[function(require,module,exports){
 'use strict';
 
 var _core = require('../core');
@@ -47269,7 +46876,7 @@ DisplayObject.prototype._cacheAsBitmapDestroy = function _cacheAsBitmapDestroy(o
     this.destroy(options);
 };
 
-},{"../core":251,"../core/textures/BaseTexture":298,"../core/textures/Texture":301,"../core/utils":311}],325:[function(require,module,exports){
+},{"../core":247,"../core/textures/BaseTexture":294,"../core/textures/Texture":297,"../core/utils":307}],321:[function(require,module,exports){
 'use strict';
 
 var _core = require('../core');
@@ -47303,7 +46910,7 @@ core.Container.prototype.getChildByName = function getChildByName(name) {
     return null;
 };
 
-},{"../core":251}],326:[function(require,module,exports){
+},{"../core":247}],322:[function(require,module,exports){
 'use strict';
 
 var _core = require('../core');
@@ -47336,7 +46943,7 @@ core.DisplayObject.prototype.getGlobalPosition = function getGlobalPosition() {
     return point;
 };
 
-},{"../core":251}],327:[function(require,module,exports){
+},{"../core":247}],323:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47388,7 +46995,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 // imported for side effect of extending the prototype only, contains no exports
 
-},{"./AnimatedSprite":321,"./BitmapText":322,"./TilingSprite":323,"./cacheAsBitmap":324,"./getChildByName":325,"./getGlobalPosition":326,"./webgl/TilingSpriteRenderer":328}],328:[function(require,module,exports){
+},{"./AnimatedSprite":317,"./BitmapText":318,"./TilingSprite":319,"./cacheAsBitmap":320,"./getChildByName":321,"./getGlobalPosition":322,"./webgl/TilingSpriteRenderer":324}],324:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47550,7 +47157,7 @@ exports.default = TilingSpriteRenderer;
 
 core.WebGLRenderer.registerPlugin('tilingSprite', TilingSpriteRenderer);
 
-},{"../../core":251,"../../core/const":232,"path":402}],329:[function(require,module,exports){
+},{"../../core":247,"../../core/const":228,"path":398}],325:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47634,7 +47241,7 @@ var AlphaFilter = function (_core$Filter) {
 
 exports.default = AlphaFilter;
 
-},{"../../core":251,"path":402}],330:[function(require,module,exports){
+},{"../../core":247,"path":398}],326:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47808,7 +47415,7 @@ var BlurFilter = function (_core$Filter) {
 
 exports.default = BlurFilter;
 
-},{"../../core":251,"./BlurXFilter":331,"./BlurYFilter":332}],331:[function(require,module,exports){
+},{"../../core":247,"./BlurXFilter":327,"./BlurYFilter":328}],327:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47974,7 +47581,7 @@ var BlurXFilter = function (_core$Filter) {
 
 exports.default = BlurXFilter;
 
-},{"../../core":251,"./generateBlurFragSource":333,"./generateBlurVertSource":334,"./getMaxBlurKernelSize":335}],332:[function(require,module,exports){
+},{"../../core":247,"./generateBlurFragSource":329,"./generateBlurVertSource":330,"./getMaxBlurKernelSize":331}],328:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -48139,7 +47746,7 @@ var BlurYFilter = function (_core$Filter) {
 
 exports.default = BlurYFilter;
 
-},{"../../core":251,"./generateBlurFragSource":333,"./generateBlurVertSource":334,"./getMaxBlurKernelSize":335}],333:[function(require,module,exports){
+},{"../../core":247,"./generateBlurFragSource":329,"./generateBlurVertSource":330,"./getMaxBlurKernelSize":331}],329:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -48186,7 +47793,7 @@ function generateFragBlurSource(kernelSize) {
     return fragSource;
 }
 
-},{}],334:[function(require,module,exports){
+},{}],330:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -48230,7 +47837,7 @@ function generateVertBlurSource(kernelSize, x) {
     return vertSource;
 }
 
-},{}],335:[function(require,module,exports){
+},{}],331:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -48246,7 +47853,7 @@ function getMaxKernelSize(gl) {
     return kernelSize;
 }
 
-},{}],336:[function(require,module,exports){
+},{}],332:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -48797,7 +48404,7 @@ var ColorMatrixFilter = function (_core$Filter) {
 exports.default = ColorMatrixFilter;
 ColorMatrixFilter.prototype.grayscale = ColorMatrixFilter.prototype.greyscale;
 
-},{"../../core":251,"path":402}],337:[function(require,module,exports){
+},{"../../core":247,"path":398}],333:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -48907,7 +48514,7 @@ var DisplacementFilter = function (_core$Filter) {
 
 exports.default = DisplacementFilter;
 
-},{"../../core":251,"path":402}],338:[function(require,module,exports){
+},{"../../core":247,"path":398}],334:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -48961,7 +48568,7 @@ var FXAAFilter = function (_core$Filter) {
 
 exports.default = FXAAFilter;
 
-},{"../../core":251,"path":402}],339:[function(require,module,exports){
+},{"../../core":247,"path":398}],335:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -49040,7 +48647,7 @@ Object.defineProperty(exports, 'AlphaFilter', {
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./alpha/AlphaFilter":329,"./blur/BlurFilter":330,"./blur/BlurXFilter":331,"./blur/BlurYFilter":332,"./colormatrix/ColorMatrixFilter":336,"./displacement/DisplacementFilter":337,"./fxaa/FXAAFilter":338,"./noise/NoiseFilter":340}],340:[function(require,module,exports){
+},{"./alpha/AlphaFilter":325,"./blur/BlurFilter":326,"./blur/BlurXFilter":327,"./blur/BlurYFilter":328,"./colormatrix/ColorMatrixFilter":332,"./displacement/DisplacementFilter":333,"./fxaa/FXAAFilter":334,"./noise/NoiseFilter":336}],336:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -49137,7 +48744,7 @@ var NoiseFilter = function (_core$Filter) {
 
 exports.default = NoiseFilter;
 
-},{"../../core":251,"path":402}],341:[function(require,module,exports){
+},{"../../core":247,"path":398}],337:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -49251,7 +48858,7 @@ if (typeof _deprecation2.default === 'function') {
 global.PIXI = exports; // eslint-disable-line
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./accessibility":228,"./core":251,"./deprecation":317,"./extract":319,"./extras":327,"./filters":339,"./interaction":346,"./loaders":349,"./mesh":358,"./particles":361,"./polyfill":367,"./prepare":371}],342:[function(require,module,exports){
+},{"./accessibility":224,"./core":247,"./deprecation":313,"./extract":315,"./extras":323,"./filters":335,"./interaction":342,"./loaders":345,"./mesh":354,"./particles":357,"./polyfill":363,"./prepare":367}],338:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -49475,7 +49082,7 @@ var InteractionData = function () {
 
 exports.default = InteractionData;
 
-},{"../core":251}],343:[function(require,module,exports){
+},{"../core":247}],339:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -49560,7 +49167,7 @@ var InteractionEvent = function () {
 
 exports.default = InteractionEvent;
 
-},{}],344:[function(require,module,exports){
+},{}],340:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -51319,7 +50926,7 @@ exports.default = InteractionManager;
 core.WebGLRenderer.registerPlugin('interaction', InteractionManager);
 core.CanvasRenderer.registerPlugin('interaction', InteractionManager);
 
-},{"../core":251,"./InteractionData":342,"./InteractionEvent":343,"./InteractionTrackingData":345,"./interactiveTarget":347,"eventemitter3":7}],345:[function(require,module,exports){
+},{"../core":247,"./InteractionData":338,"./InteractionEvent":339,"./InteractionTrackingData":341,"./interactiveTarget":343,"eventemitter3":7}],341:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -51495,7 +51102,7 @@ InteractionTrackingData.FLAGS = Object.freeze({
     RIGHT_DOWN: 1 << 2
 });
 
-},{}],346:[function(require,module,exports){
+},{}],342:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -51547,7 +51154,7 @@ Object.defineProperty(exports, 'InteractionEvent', {
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./InteractionData":342,"./InteractionEvent":343,"./InteractionManager":344,"./InteractionTrackingData":345,"./interactiveTarget":347}],347:[function(require,module,exports){
+},{"./InteractionData":338,"./InteractionEvent":339,"./InteractionManager":340,"./InteractionTrackingData":341,"./interactiveTarget":343}],343:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -51664,7 +51271,7 @@ exports.default = {
   _trackedPointers: undefined
 };
 
-},{}],348:[function(require,module,exports){
+},{}],344:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -51756,7 +51363,7 @@ function parse(resource, texture) {
     resource.bitmapFont = _extras.BitmapText.registerFont(resource.data, texture);
 }
 
-},{"../core":251,"../extras":327,"path":402,"resource-loader":380}],349:[function(require,module,exports){
+},{"../core":247,"../extras":323,"path":398,"resource-loader":376}],345:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -51884,7 +51491,7 @@ AppPrototype.destroy = function destroy(removeView) {
     this._parentDestroy(removeView);
 };
 
-},{"../core/Application":229,"./bitmapFontParser":348,"./loader":350,"./spritesheetParser":351,"./textureParser":352,"resource-loader":380}],350:[function(require,module,exports){
+},{"../core/Application":225,"./bitmapFontParser":344,"./loader":346,"./spritesheetParser":347,"./textureParser":348,"resource-loader":376}],346:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -52055,7 +51662,7 @@ var Resource = _resourceLoader2.default.Resource;
 
 Resource.setExtensionXhrType('fnt', Resource.XHR_RESPONSE_TYPE.DOCUMENT);
 
-},{"./bitmapFontParser":348,"./spritesheetParser":351,"./textureParser":352,"eventemitter3":7,"resource-loader":380,"resource-loader/lib/middlewares/parsing/blob":381}],351:[function(require,module,exports){
+},{"./bitmapFontParser":344,"./spritesheetParser":347,"./textureParser":348,"eventemitter3":7,"resource-loader":376,"resource-loader/lib/middlewares/parsing/blob":377}],347:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -52114,7 +51721,7 @@ function getResourcePath(resource, baseUrl) {
     return _url2.default.resolve(resource.url.replace(baseUrl, ''), resource.data.meta.image);
 }
 
-},{"../core":251,"resource-loader":380,"url":408}],352:[function(require,module,exports){
+},{"../core":247,"resource-loader":376,"url":404}],348:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -52137,7 +51744,7 @@ var _Texture2 = _interopRequireDefault(_Texture);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../core/textures/Texture":301,"resource-loader":380}],353:[function(require,module,exports){
+},{"../core/textures/Texture":297,"resource-loader":376}],349:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -52506,7 +52113,7 @@ Mesh.DRAW_MODES = {
   TRIANGLES: 1
 };
 
-},{"../core":251,"../core/textures/Texture":301}],354:[function(require,module,exports){
+},{"../core":247,"../core/textures/Texture":297}],350:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -52892,7 +52499,7 @@ var NineSlicePlane = function (_Plane) {
 
 exports.default = NineSlicePlane;
 
-},{"./Plane":355}],355:[function(require,module,exports){
+},{"./Plane":351}],351:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -53033,7 +52640,7 @@ var Plane = function (_Mesh) {
 
 exports.default = Plane;
 
-},{"./Mesh":353}],356:[function(require,module,exports){
+},{"./Mesh":349}],352:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -53269,7 +52876,7 @@ var Rope = function (_Mesh) {
 
 exports.default = Rope;
 
-},{"./Mesh":353}],357:[function(require,module,exports){
+},{"./Mesh":349}],353:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -53552,7 +53159,7 @@ exports.default = MeshSpriteRenderer;
 
 core.CanvasRenderer.registerPlugin('mesh', MeshSpriteRenderer);
 
-},{"../../core":251,"../Mesh":353}],358:[function(require,module,exports){
+},{"../../core":247,"../Mesh":349}],354:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -53613,7 +53220,7 @@ Object.defineProperty(exports, 'Rope', {
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./Mesh":353,"./NineSlicePlane":354,"./Plane":355,"./Rope":356,"./canvas/CanvasMeshRenderer":357,"./webgl/MeshRenderer":359}],359:[function(require,module,exports){
+},{"./Mesh":349,"./NineSlicePlane":350,"./Plane":351,"./Rope":352,"./canvas/CanvasMeshRenderer":353,"./webgl/MeshRenderer":355}],355:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -53764,7 +53371,7 @@ exports.default = MeshRenderer;
 
 core.WebGLRenderer.registerPlugin('mesh', MeshRenderer);
 
-},{"../../core":251,"../Mesh":353,"path":402,"pixi-gl-core":215}],360:[function(require,module,exports){
+},{"../../core":247,"../Mesh":349,"path":398,"pixi-gl-core":211}],356:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -54143,7 +53750,7 @@ var ParticleContainer = function (_core$Container) {
 
 exports.default = ParticleContainer;
 
-},{"../core":251,"../core/utils":311}],361:[function(require,module,exports){
+},{"../core":247,"../core/utils":307}],357:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -54168,7 +53775,7 @@ Object.defineProperty(exports, 'ParticleRenderer', {
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./ParticleContainer":360,"./webgl/ParticleRenderer":363}],362:[function(require,module,exports){
+},{"./ParticleContainer":356,"./webgl/ParticleRenderer":359}],358:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -54415,7 +54022,7 @@ var ParticleBuffer = function () {
 
 exports.default = ParticleBuffer;
 
-},{"../../core/utils/createIndicesForQuads":309,"pixi-gl-core":215}],363:[function(require,module,exports){
+},{"../../core/utils/createIndicesForQuads":305,"pixi-gl-core":211}],359:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -54891,7 +54498,7 @@ exports.default = ParticleRenderer;
 
 core.WebGLRenderer.registerPlugin('particle', ParticleRenderer);
 
-},{"../../core":251,"../../core/utils":311,"./ParticleBuffer":362,"./ParticleShader":364}],364:[function(require,module,exports){
+},{"../../core":247,"../../core/utils":307,"./ParticleBuffer":358,"./ParticleShader":360}],360:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -54934,7 +54541,7 @@ var ParticleShader = function (_Shader) {
 
 exports.default = ParticleShader;
 
-},{"../../core/Shader":230}],365:[function(require,module,exports){
+},{"../../core/Shader":226}],361:[function(require,module,exports){
 "use strict";
 
 // References:
@@ -54952,7 +54559,7 @@ if (!Math.sign) {
     };
 }
 
-},{}],366:[function(require,module,exports){
+},{}],362:[function(require,module,exports){
 'use strict';
 
 var _objectAssign = require('object-assign');
@@ -54967,7 +54574,7 @@ if (!Object.assign) {
 // https://github.com/sindresorhus/object-assign
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
 
-},{"object-assign":190}],367:[function(require,module,exports){
+},{"object-assign":190}],363:[function(require,module,exports){
 'use strict';
 
 require('./Object.assign');
@@ -54992,7 +54599,7 @@ if (!window.Uint16Array) {
     window.Uint16Array = Array;
 }
 
-},{"./Math.sign":365,"./Object.assign":366,"./requestAnimationFrame":368}],368:[function(require,module,exports){
+},{"./Math.sign":361,"./Object.assign":362,"./requestAnimationFrame":364}],364:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -55069,7 +54676,7 @@ if (!global.cancelAnimationFrame) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],369:[function(require,module,exports){
+},{}],365:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -55557,7 +55164,7 @@ function findTextStyle(item, queue) {
     return false;
 }
 
-},{"../core":251,"./limiters/CountLimiter":372}],370:[function(require,module,exports){
+},{"../core":247,"./limiters/CountLimiter":368}],366:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -55677,7 +55284,7 @@ function uploadBaseTextures(prepare, item) {
 
 core.CanvasRenderer.registerPlugin('prepare', CanvasPrepare);
 
-},{"../../core":251,"../BasePrepare":369}],371:[function(require,module,exports){
+},{"../../core":247,"../BasePrepare":365}],367:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -55729,7 +55336,7 @@ Object.defineProperty(exports, 'TimeLimiter', {
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./BasePrepare":369,"./canvas/CanvasPrepare":370,"./limiters/CountLimiter":372,"./limiters/TimeLimiter":373,"./webgl/WebGLPrepare":374}],372:[function(require,module,exports){
+},{"./BasePrepare":365,"./canvas/CanvasPrepare":366,"./limiters/CountLimiter":368,"./limiters/TimeLimiter":369,"./webgl/WebGLPrepare":370}],368:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -55787,7 +55394,7 @@ var CountLimiter = function () {
 
 exports.default = CountLimiter;
 
-},{}],373:[function(require,module,exports){
+},{}],369:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -55845,7 +55452,7 @@ var TimeLimiter = function () {
 
 exports.default = TimeLimiter;
 
-},{}],374:[function(require,module,exports){
+},{}],370:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -55967,7 +55574,7 @@ function findGraphics(item, queue) {
 
 core.WebGLRenderer.registerPlugin('prepare', WebGLPrepare);
 
-},{"../../core":251,"../BasePrepare":369}],375:[function(require,module,exports){
+},{"../../core":247,"../BasePrepare":365}],371:[function(require,module,exports){
 'use strict'
 
 /**
@@ -55997,7 +55604,7 @@ module.exports = function removeItems(arr, startIdx, removeCount)
   arr.length = len
 }
 
-},{}],376:[function(require,module,exports){
+},{}],372:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -56615,7 +56222,7 @@ var Loader = function () {
 
 exports.default = Loader;
 
-},{"./Resource":377,"./async":378,"mini-signals":189,"parse-uri":191}],377:[function(require,module,exports){
+},{"./Resource":373,"./async":374,"mini-signals":189,"parse-uri":191}],373:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -57771,7 +57378,7 @@ function reqType(xhr) {
     return xhr.toString().replace('object ', '');
 }
 
-},{"mini-signals":189,"parse-uri":191}],378:[function(require,module,exports){
+},{"mini-signals":189,"parse-uri":191}],374:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -57980,7 +57587,7 @@ function queue(worker, concurrency) {
     return q;
 }
 
-},{}],379:[function(require,module,exports){
+},{}],375:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -58048,7 +57655,7 @@ function encodeBinary(input) {
     return output;
 }
 
-},{}],380:[function(require,module,exports){
+},{}],376:[function(require,module,exports){
 'use strict';
 
 // import Loader from './Loader';
@@ -58072,7 +57679,7 @@ module.exports = Loader;
 // export default Loader;
 module.exports.default = Loader;
 
-},{"./Loader":376,"./Resource":377,"./async":378,"./b64":379}],381:[function(require,module,exports){
+},{"./Loader":372,"./Resource":373,"./async":374,"./b64":375}],377:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -58160,7 +57767,7 @@ function blobMiddlewareFactory() {
     };
 }
 
-},{"../../Resource":377,"../../b64":379}],382:[function(require,module,exports){
+},{"../../Resource":373,"../../b64":375}],378:[function(require,module,exports){
 // A library of seedable RNGs implemented in Javascript.
 //
 // Usage:
@@ -58222,7 +57829,7 @@ sr.tychei = tychei;
 
 module.exports = sr;
 
-},{"./lib/alea":383,"./lib/tychei":384,"./lib/xor128":385,"./lib/xor4096":386,"./lib/xorshift7":387,"./lib/xorwow":388,"./seedrandom":389}],383:[function(require,module,exports){
+},{"./lib/alea":379,"./lib/tychei":380,"./lib/xor128":381,"./lib/xor4096":382,"./lib/xorshift7":383,"./lib/xorwow":384,"./seedrandom":385}],379:[function(require,module,exports){
 // A port of an algorithm by Johannes Baagøe <baagoe@baagoe.com>, 2010
 // http://baagoe.com/en/RandomMusings/javascript/
 // https://github.com/nquinlan/better-random-numbers-for-javascript-mirror
@@ -58338,7 +57945,7 @@ if (module && module.exports) {
 
 
 
-},{}],384:[function(require,module,exports){
+},{}],380:[function(require,module,exports){
 // A Javascript implementaion of the "Tyche-i" prng algorithm by
 // Samuel Neves and Filipe Araujo.
 // See https://eden.dei.uc.pt/~sneves/pubs/2011-snfa2.pdf
@@ -58443,7 +58050,7 @@ if (module && module.exports) {
 
 
 
-},{}],385:[function(require,module,exports){
+},{}],381:[function(require,module,exports){
 // A Javascript implementaion of the "xor128" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -58526,7 +58133,7 @@ if (module && module.exports) {
 
 
 
-},{}],386:[function(require,module,exports){
+},{}],382:[function(require,module,exports){
 // A Javascript implementaion of Richard Brent's Xorgens xor4096 algorithm.
 //
 // This fast non-cryptographic random number generator is designed for
@@ -58674,7 +58281,7 @@ if (module && module.exports) {
   (typeof define) == 'function' && define   // present with an AMD loader
 );
 
-},{}],387:[function(require,module,exports){
+},{}],383:[function(require,module,exports){
 // A Javascript implementaion of the "xorshift7" algorithm by
 // François Panneton and Pierre L'ecuyer:
 // "On the Xorgshift Random Number Generators"
@@ -58773,7 +58380,7 @@ if (module && module.exports) {
 );
 
 
-},{}],388:[function(require,module,exports){
+},{}],384:[function(require,module,exports){
 // A Javascript implementaion of the "xorwow" prng algorithm by
 // George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
 
@@ -58861,7 +58468,7 @@ if (module && module.exports) {
 
 
 
-},{}],389:[function(require,module,exports){
+},{}],385:[function(require,module,exports){
 /*
 Copyright 2014 David Bau.
 
@@ -59110,7 +58717,7 @@ if ((typeof module) == 'object' && module.exports) {
   Math    // math: package containing random, pow, and seedrandom
 );
 
-},{"crypto":401}],390:[function(require,module,exports){
+},{"crypto":397}],386:[function(require,module,exports){
 // TinyColor v1.4.1
 // https://github.com/bgrins/TinyColor
 // Brian Grinstead, MIT License
@@ -60307,7 +59914,7 @@ else {
 
 })(Math);
 
-},{}],391:[function(require,module,exports){
+},{}],387:[function(require,module,exports){
 // angle.js <https://github.com/davidfig/anglejs>
 // Released under MIT license <https://github.com/davidfig/angle/blob/master/LICENSE>
 // Author: David Figatner
@@ -60583,7 +60190,7 @@ module.exports = {
     equals,
     explain
 }
-},{}],392:[function(require,module,exports){
+},{}],388:[function(require,module,exports){
 /**
  * @file color.js
  * @author David Figatner
@@ -60892,7 +60499,7 @@ class Color
 };
 
 module.exports = new Color();
-},{"yy-random":399}],393:[function(require,module,exports){
+},{"yy-random":395}],389:[function(require,module,exports){
 // yy-counter
 // In-browser counter to watch changeable values like counters or FPS
 // David Figatner
@@ -61010,7 +60617,7 @@ module.exports = class Counter
         this.div.innerHTML = s
     }
 }
-},{}],394:[function(require,module,exports){
+},{}],390:[function(require,module,exports){
 const Color = require('tinycolor2')
 const Counter = require('yy-counter')
 
@@ -61242,13 +60849,92 @@ module.exports = class FPS
         }
     }
 }
-},{"tinycolor2":390,"yy-counter":393}],395:[function(require,module,exports){
-arguments[4][195][0].apply(exports,arguments)
-},{"./src/loop":398,"dup":195}],396:[function(require,module,exports){
+},{"tinycolor2":386,"yy-counter":389}],391:[function(require,module,exports){
+module.exports = require('./src/loop')
+},{"./src/loop":394}],392:[function(require,module,exports){
 arguments[4][194][0].apply(exports,arguments)
-},{"dup":194}],397:[function(require,module,exports){
-arguments[4][197][0].apply(exports,arguments)
-},{"dup":197,"eventemitter3":396}],398:[function(require,module,exports){
+},{"dup":194}],393:[function(require,module,exports){
+const Events = require('eventemitter3')
+
+/** Entry class for Loop */
+class Entry extends Events
+{
+    /**
+     * create an entry in the update loop
+     * used by Loop
+     * @param {function} callback
+     * @param {number} [time=0] in milliseconds to call this update
+     * @param {number} [count] number of times to run this update (undefined=infinite)
+     */
+    constructor(callback, time, count)
+    {
+        super()
+        this.callback = callback
+        this.time = time
+        this.current = 0
+        this.count = count
+    }
+
+    /**
+     * run the callback if available
+     * @private
+     * @param {number} elapsed
+     */
+    _update(elapsed)
+    {
+        let result
+        if (this.callback)
+        {
+            result = this.callback(elapsed, this)
+        }
+        this.emit('each', elapsed, this)
+        if (result || (!isNaN(this.count) && !--this.count))
+        {
+            this.emit('done', this)
+            return true
+        }
+    }
+
+    /**
+     * update checks time and runs the callback
+     * @param {number} elapsed
+     * @return {boolean} whether entry is complete and may be removed from list
+     */
+    update(elapsed)
+    {
+        if (!this._pause)
+        {
+            if (this.time)
+            {
+                this.current += elapsed
+                if (this.current >= this.time)
+                {
+                    this.current -= this.time
+                    return this._update(elapsed)
+                }
+            }
+            else
+            {
+                return this._update(elapsed)
+            }
+        }
+    }
+
+    /**
+     * @type {boolean} pause this entry
+     */
+    set pause(value)
+    {
+        this._pause = value
+    }
+    get pause()
+    {
+        return this._pause
+    }
+}
+
+module.exports = Entry
+},{"eventemitter3":392}],394:[function(require,module,exports){
 /* Copyright (c) 2017 YOPEY YOPEY LLC */
 
 const Events = require('eventemitter3')
@@ -61442,7 +61128,7 @@ const Entry = require('./entry')
 
 Loop.entry = Entry
 module.exports = Loop
-},{"./entry":397,"eventemitter3":396}],399:[function(require,module,exports){
+},{"./entry":393,"eventemitter3":392}],395:[function(require,module,exports){
 // yy-random
 // by David Figatner
 // MIT license
@@ -61868,7 +61554,7 @@ class Random
 }
 
 module.exports = new Random()
-},{"seedrandom":382}],400:[function(require,module,exports){
+},{"seedrandom":378}],396:[function(require,module,exports){
 // yy-renderer
 // by David Figatner
 // (c) YOPEY YOPEY LLC 2017
@@ -62286,9 +61972,9 @@ class Renderer extends Loop
 }
 
 module.exports = Renderer
-},{"exists":8,"pixi.js":341,"yy-fps":394,"yy-loop":395}],401:[function(require,module,exports){
+},{"exists":8,"pixi.js":337,"yy-fps":390,"yy-loop":391}],397:[function(require,module,exports){
 
-},{}],402:[function(require,module,exports){
+},{}],398:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -62516,7 +62202,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":403}],403:[function(require,module,exports){
+},{"_process":399}],399:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -62702,7 +62388,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],404:[function(require,module,exports){
+},{}],400:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -63239,7 +62925,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],405:[function(require,module,exports){
+},{}],401:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -63325,7 +63011,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],406:[function(require,module,exports){
+},{}],402:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -63412,13 +63098,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],407:[function(require,module,exports){
+},{}],403:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":405,"./encode":406}],408:[function(require,module,exports){
+},{"./decode":401,"./encode":402}],404:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -64152,7 +63838,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":409,"punycode":404,"querystring":407}],409:[function(require,module,exports){
+},{"./util":405,"punycode":400,"querystring":403}],405:[function(require,module,exports){
 'use strict';
 
 module.exports = {
